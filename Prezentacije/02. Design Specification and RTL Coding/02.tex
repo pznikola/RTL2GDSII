@@ -1,4 +1,19 @@
-\documentclass{beamer}
+\documentclass[t]{beamer}
+
+% set fonts
+\usefonttheme{professionalfonts} % using non standard fonts for beamer
+\usepackage{txfonts,mathptmx}
+
+% set indend spacing for first and second level indentation
+\setlength{\leftmargini}{0.5cm}
+\setlength{\leftmarginii}{0.5cm}
+
+% Set circles for bullets 
+
+\setbeamertemplate{itemize items}[circle]
+
+% increase space between text and frame name
+\addtobeamertemplate{frametitle}{}{\vspace{1em}}
 
 %Information to be included in the title page:
 \title{Design Specification and RTL Coding}
