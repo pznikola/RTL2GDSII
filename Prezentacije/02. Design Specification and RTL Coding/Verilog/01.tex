@@ -1,0 +1,123 @@
+\documentclass[t]{beamer}
+
+% set fonts
+\usefonttheme{professionalfonts} % using non standard fonts for beamer
+\usepackage{txfonts,mathptmx}
+
+% set indend spacing for first and second level indentation
+\setlength{\leftmargini}{0.5cm}
+\setlength{\leftmarginii}{0.5cm}
+
+% Set circles for bullets 
+
+\setbeamertemplate{itemize items}[circle]
+
+% increase space between text and frame name
+\addtobeamertemplate{frametitle}{}{\vspace{1em}}
+
+%Information to be included in the title page:
+\title{Verilog}
+\author{Nikola Petrovic}
+\institute{University of Belgrade, School of Electrical Engineering}
+\date{2022}
+
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Prerequisite}
+
+Before taking this course, you need to have:
+\begin{itemize}
+\item Basic computer literacy – you must know how to use a shell and editor of your choice and navigate the file system.
+\item A basic understanding of digital hardware design and verification.
+\item Knowledge of a procedural programming language will facilitate your learning experience.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Objective}
+
+In this course, you: 
+\begin{itemize}
+
+\item Use fundamental Verilog language constructs required for design, verification and logic synthesis.
+\item Analyze and ensure that Verilog designs meet the requirements for synthesis.
+\item Compare mismatches that can happen between pre-synthesis and post-synthesis simulation and the process of synthesis.
+\item Debug digital designs by developing Verilog test environments of significant capability and complexity.
+\item Apply system tasks and functions to verify digital designs using the Incisive® Enterprise Simulator.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Agenda}
+Day 1:
+\begin{itemize}
+\item About this course
+\item Overview of cadence software
+\item Descibing Verilog Applications
+\item Verilog introduction
+\item Choosing between Verilog Data Types
+\item Using Verilog Operators
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Agenda}
+Day 2:
+\begin{itemize}
+\item Making Procedural Statements
+\item Using Blocking and Non-Blocking Assignments
+\item Using Continuous and Procedural Assignments
+\item Understanding Simulation Cycle
+Using Functions and Tasks
+\item Directing the Compiler
+\end{itemize}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Agenda}
+Day 3:
+\begin{itemize}
+\item Introducing the Process of Synthesis
+\item Coding RTL for Synthesis
+\item Designing Finite State Machines
+\item Avoiding Simulation Mismatches
+\item Managing the Logic Synthesis process
+\item Coding and Synthesizing an Example Verilog Design
+\end{itemize}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Course Agenda}
+Day 4:
+\begin{itemize}
+\item Using Verification Constructs
+\item Coding Design Behavioural Algorithmically
+\item Generating Test Stimulus
+\item Developing a Testbench
+\item Example Verilog Testbench
+\item Course Conclusion
+\item Next Steps
+\end{itemize}
+
+
+\end{frame}
+
+\end{document}
