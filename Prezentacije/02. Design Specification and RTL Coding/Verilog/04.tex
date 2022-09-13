@@ -1,0 +1,229 @@
+\documentclass[t, notes, xcolor=table]{beamer}
+
+\usepackage{wrapfig}
+\usepackage{float}
+% For tabs in verbatim
+\usepackage{fancyvrb}
+
+% set fonts
+\usefonttheme{professionalfonts} % using non standard fonts for beamer
+\usepackage{txfonts,mathptmx}
+
+% set indend spacing for first and second level indentation
+\setlength{\leftmargini}{0.5cm}
+\setlength{\leftmarginii}{0.5cm}
+\setlength{\leftmarginiii}{0.5cm}
+
+% Set circles for bullets 
+\setbeamertemplate{itemize items}[circle]
+
+% colors
+\usepackage{xcolor}
+
+% multiple columns
+\usepackage{multicol}
+
+% todo lists
+\usepackage{pifont}
+\usepackage{amssymb}
+
+% increase space between text and frame name
+\addtobeamertemplate{frametitle}{}{\vspace{0.5em}}
+
+%Information to be included in the title page:
+\title{Choosing Between Verilog Data Types}
+\author{Nikola Petrovic}
+\institute{University of Belgrade, School of Electrical Engineering}
+\date{2022}
+
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Objective}
+
+In this module we will choose and use the Verilog data types correctly.
+\newline
+
+\textbf{Topics}
+
+\begin{itemize}
+\item Logic values
+\item Net and Register type rules and example
+\item Declaring vectors (truncation and padding)
+\item Defining literal values
+\item Declaring nets
+\item Declaring variables
+\item Declaring arrays of nets and variables
+\item Declaring module parameters
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Value Set}
+\footnotesize{
+
+\begin{tabular}{ |c|l| } 
+\hline
+ \rowcolor{lightgray} 
+ Value & Associated Informal Terms  \\ 
+ \hline
+ 0 & Zero, Low, False, Logic Low, Ground, VSS  \\ 
+ \hline
+ 1 & One, High, True, Logic High, Power, VDD, VCC  \\ 
+ \hline
+ Z & HiZ, High Impedance, Tri-State, Undriven, Unconnected, Driver disabled   \\ 
+ \hline
+ X & Uninitialized, Unknown  \\ 
+ \hline
+\end{tabular}
+}
+\end{frame}
+
+\note{
+
+\footnotesize{
+The Verilog value set consists of four basic values:
+\begin{itemize}
+\item 0 - Represents a logic zero, low, false condition
+\item 1 - Represents a logic one, high, true condition
+\item Z - Represents a high impedance state
+\item X - Represents an unknown state
+\end{itemize}
+}
+}
+
+\note{
+
+\tiny{
+The simulator initializes most nets to high-impedance state. The exception are nets of \textbf{trireg} type, this is because they represents capacitive nets so they are initialized to unknown value.
+\newline
+
+Upon commencing the simulation, simulator propagates the values of net drivers onto the nets. A net that has no drivers will remain in its initialized value throughout the simulation. This situation is usually the result of user error, as there are seldom good reason to leave a net undriven.
+\newline
+
+The simulator initialized most variables to unknown value. The exception is variable of the \textbf{real} type, which is initialized to 0 since this is the only type that cannot hold high-impedance or unknown values.
+\newline
+
+A variable that is never assigned a value will remained in its initialized value throughout simulation.
+\newline
+
+The appearance during simulation of a high-impedance value on a net is usually due to its drivers being disabled. In real hardware this situation either has short duration or doesn't occur because bus keepers pull the nets to a high or a low logic states. 
+\newline
+
+The appearance during simulation of a unknown value on a net is usually due to clash between drivers driving different values. In real hardware, this situation will either not exist or have an extremely short duration.
+\newline
+
+The appearance during simulation of a high-impedance value on a variable is due to the assignment of that value to the variable, either deliberately because that value represents one of the drivers on the bus net, or by assigning a value of a net to a variable. 
+\newline
+
+The appearance during simulation of a unknown value on a variable is due to the assignment of that value to the variable, either deliberately because the simulator cannot resolve the value of assigned expression, or by assigning a value of a net to a variable. In real hardware, variable will assume 0 or 1 state.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Data Types}
+
+Verilog provides three groups of value objects and different types in each group:
+\begin{itemize}
+\item \textcolor{blue}{Nets}
+\begin{itemize}
+	\item Represents physical connection between structure and objects supply0, suppy1, tri\textbackslash wire, tri0, tri1, triand\textbackslash wand, trior\textbackslash wor, trireg
+\end{itemize}
+\item \textcolor{blue}{Variables}
+\begin{itemize}
+	\item Represents abstract storage elements: integer, real, reg, time, realtime 
+\end{itemize}
+\item \textcolor{blue}{Parameters}
+\begin{itemize}
+	\item Run-time constants: localparam, parameter, specparam
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\note{
+\scriptsize{
+Procedures communicate by passing events, and by passing data via nets and shared variables informally called signals. Verilog does not actually have things called signals. Verilog has three group of value objects and only a very few types in each group:
+\begin{itemize}
+\item Verilog has \textbf{nets} to represent physical connection between structure and objects (supply0, suppy1, tri\textbackslash wire, tri0, tri1, triand\textbackslash wand, trior\textbackslash wor, trireg).
+\item It has \textbf{variables} to represent abstract storage elements (integer, real, reg, time, realtime).
+\item Verilog has two simulation-time constants and a annotatable constant (localparam, parameter and specparam). These are constants and it is illegal to modify them run-time.
+\end{itemize}
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Net and Register Type Rules}
+
+We can specify the type upon declaration.
+\begin{itemize}
+\item \textcolor{blue}{Nets} and \textcolor{blue}{registers} are one-bit wide unless you also specify the range.
+\item A port declaration implicitly declares an one-bit \textcolor{blue}{wire} net unless you explicitly declare otherwise.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+
+\end{document}
