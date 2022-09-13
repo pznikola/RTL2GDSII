@@ -170,8 +170,42 @@ We can specify the type upon declaration.
 \item A port declaration implicitly declares an one-bit \textcolor{blue}{wire} net unless you explicitly declare otherwise.
 \end{itemize}
 
+Rules govern our use of data types:
+\begin{itemize}
+\item Variables can only be driven inside procedures.
+\item Nets are driven everywhere else (outside procedures)
+\item Constants are for unchanging or instance-specific values.
+\end{itemize}
+
 \end{frame}
 
+\note{
+\scriptsize{
+A data item has associated with it the data values it can have and rules for how you use it.
+\newline
+
+A net is the recipient of its drivers' values.
+\newline
+
+A variable is an item you procedurally assign values to.
+\newline
+
+A port is a net or variables that the instantiating module can connect its own net or variables to.
+\newline
+
+A parameter is like a variable but has a constant value.
+\newline
+
+Ports, nets, and variables of the \textbf{reg} type are a single bit unless you declare them with a range.
+\newline
+
+These module headers show two ways to declare ports:
+\begin{itemize}
+\item We can list the ports in the module header and later declare them as a module item
+\item As of the Verilog 2001 update, we can directly declare the ports in the module header.
+\end{itemize}
+}
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Module}
