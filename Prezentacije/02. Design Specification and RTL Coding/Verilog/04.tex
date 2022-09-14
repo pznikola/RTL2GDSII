@@ -206,21 +206,399 @@ These module headers show two ways to declare ports:
 \end{itemize}
 }
 }
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Type Rules in Connectivity}
+
+\begin{itemize}
+\item Module \textcolor{purple}{input} ports are always nets.
+\item Module \textcolor{purple}{output} ports are variables if driven by a procedural block, or nets in all other cases.
+\item Connections to the \textcolor{purple}{input} ports of a module instance are variables if driven by a procedural block,, or nets in all other cases.
+\item Connections to the \textcolor{purple}{output} ports of a module instance are always nets.
+\item Connections to bidirectional \textcolor{purple}{inout} ports are always nets.
+\end{itemize}
+
+\begin{figure}[H!]
+    \includegraphics[width=0.7\textwidth]{img/04_nets.png}
+\end{figure}
+
+\note{
+A port permits an external net or variable to connect to an internal net or variable, with restrictions.
+
+Here are some common user errors, along with their typical error messages:
+\begin{itemize}
+\item We make a procedural assignment to a signal that we either declared as a net or we forgot to declare so is thus implicitly a net. This is an illegal statement.
+\item We connect an output from an instance to a signal declared as a register. This is illegal as a module output can only drive a net. This is an illegal output port specification.
+\item We declare a signal as a module input and as a register. This is illegal as inputs can only be nets. These are incompatible declarations.
+\end{itemize}
+}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Net and Register Type Example}
+
+\begin{multicols}{2}
+{\tiny%
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{module} yin(
+	\textcolor{purple}{output reg} y_out,
+	\textcolor{purple}{input wire} a_in, b_in
+);
+\textcolor{purple}{always} @ (a_in or b_in)
+	y_out = a_in && b_in;
+\textcolor{purple}{endmodule}
+
+\textcolor{purple}{module} yang(
+	\textcolor{purple}{output wire} y_out,
+	\textcolor{purple}{input wire} a_in, b_in
+);
+\textcolor{purple}{assign} y_out <= a_in || b_in;
+\textcolor{purple}{endmodule}
+
+\textcolor{purple}{module} yin_and_yang_tb;
+	\textcolor{purple}{reg} a, b;
+	\textcolor{purple}{wire} and_out, or_out;
+	yin u1 (and_out, a, b);
+	yang u2 (or_out, a, b);
+	\textcolor{purple}{initial begin}
+		a = 0;
+		b = 0;
+		...
+	\textcolor{purple}{end}
+\textcolor{purple}{endmodule}
+\end{Verbatim}
+}
+
+\vfill
+
+\columnbreak
+
+\begin{figure}[H!]
+    \includegraphics[width=0.45\textwidth]{img/04_net_example.png}
+\end{figure}
+\end{multicols}
 
 \end{frame}
 
+\note{
+\scriptsize{
+We are using here fully defined Verilog-2001 ANSI-C syntax for module port declarations for clarity.
+\newline
+
+In both module yin and yang, the input ports a\_in and b\_in \textbf{must} be declared as net data types.
+\newline
+
+In module yin, the output y\_out \textbf{must} be declared as a register data type as it is assigned from the \textit{always} procedural block.
+\newline
+
+In module yang, the output y\_out \textbf{must} be declared as a net type as it is driven from the continuous assign statement.
+\newline
+
+In module \textit{test}, a and b \textbf{must} be declared as register data types as they are assigned from the \textit{initial} procedural block, but and\_out and or\_out \textbf{must} be declared as net data types as they are driven from the instance output ports.
+\newline
+
+Therefore a connection like a -$>$ a\_in, or y\_out -$>$ and\_out actually changes data type as it crosses the module boundary.
+
+}
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
+\begin{frame}[fragile]
+\frametitle{Declaring Vectors}
+
+A vector is a net or reg with a range specification.
+
+We can specify the vector's range when declaring the variable:
+\begin{itemize}
+\item {[msb : lsb]} or {[lsb: msb]}
+\item Range can be ascending or descending
+\item Bounds can be negative, zero or positive
+\item Bounds must be constant expressions
+\item Individual bits can be selected from a vector
+\end{itemize}
+
+\begin{multicols}{2}
+{\footnotesize%
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{module} mux4 (
+	\textcolor{purple}{input wire} [3:0] a, b,
+	\textcolor{purple}{input wire}       sel,
+	\textcolor{purple}{output reg} [3:0] op
+);
+\textcolor{purple}{always} @ (a or b or sel)
+	\textcolor{purple}{if} (sel == 1)
+		op = b;
+	\textcolor{purple}{else}
+		op = a;
+\textcolor{purple}{endmodule}
+
+\end{Verbatim}
+}
+
+\vfill
+
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.40\textwidth]{img/04_vectors.png}
+\end{figure}
+\end{multicols}
 
 \end{frame}
 
+\note {
+Ports, nets, and variables of the \textbf{reg} type are a single bit unless we declare them with a range.
+\newline
+
+To declare u multiple bit \textbf{port, net,} or \textbf{reg} variable, we need to specify a range. The range provides addresses for the individual bits. The only restriction on the range bounds is that they must be constant expressions. Either or both bound can be negative, zero, or positive, and the range can be ascending or descending.
+
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Using Vector Ranges}
+
+Access vector selections whatever way you declared the range.
+\begin{itemize}
+\item Select one or more contiguous bits.
+\end{itemize}
+\begin{figure}[H!]
+    \includegraphics[width=0.95\textwidth]{img/04_range.png}
+\end{figure}
+
+\end{frame}
+
+\note{
+The vector range provides addresses for the individual bits. We can address a vector bit by providing an index and a vector part by providing a range. 
+\newline
+
+The part selection range must be in the same order as in the declaration, either ascending or descending.
+\newline
+
+The first illustration assigns an \textit{input} port to the \textit{output} port.
+\newline 
+
+The second illustration assigns one bit of an \textit{input} port to one bit of the \textit{output} port.
+\newline
+
+The third illustration assigns the value of a \textit{reg} vector to another \textit{reg} vector.
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Assigning Between Different Widths}
+Vector widths do not need to match in an assignment!
+\begin{itemize}
+\item Source wider than target truncates value from msb.
+\item Unsigned source shorter that target zero-extends value.
+\item Signed source shorter that target sign-extends value.
+\begin{itemize}
+	\item Selections and concatenations are not considered signed.
+\end{itemize}
+\end{itemize}
+\begin{figure}[H!]
+    \includegraphics[width=0.95\textwidth]{img/04_width.png}
+\end{figure}
+
+\end{frame}
+
+\note{
+We can assign between vectors of different widths:
+\begin{itemize}
+\item Verilog truncates the leftmost bits when assigning a wider vector to a narrower vector. If we want to select some range other that the rightmost bits then you must specify that range.
+\item Verilog pads the leftmost bits with 0 when assigning narrower vector to a wider vector. If you want to assign something other that 0, then you need to use the concatenation operator to construct a wider expression.
+\end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Defining Literal Values}
+
+We can specify a literal value as: \textcolor{red}{$<size>'<base><value>$}
+\begin{itemize}
+\item \textcolor{purple}{size} is an optional positive decimal number. If unsized is at least 32 bits.
+\item \textcolor{purple}{base} is a character to indicate binary, octal, decimal, or hexadecimal radix.
+\begin{itemize}
+	\item B/b, O/o, D/d, H/h
+	\item Verilog-2001: Optionally preceded by and "s" character to indicate a signed value.
+\end{itemize} 
+\item \textcolor{purple}{value} is legal digits for base:
+\begin{itemize}
+	\item Can include "\_" if not 1st character
+	\item Can include Z/z and X/x if base is binary, octal or hexadecimal
+	\item Verilog-2001: can be single Z/z or X/x digit if decimal base
+	\item value is itself an unsigned number
+\end{itemize}
+\end{itemize}
+
+\begin{figure}[H!]
+    \includegraphics[width=0.55\textwidth]{img/04_literal.png}
+\end{figure}
+
+\end{frame}
+
+\note{
+\tiny{
+We specify integer literals in binary, octal, decimal or hexadecimal format.
+\newline
+
+We can specify a decimal integer literal as an optional sign fallowed by a sequence of decimal digits. A number in this format is a signed number.
+\newline
+
+We can specify any integer literal as an optional sign fallowed by and optional size followed by a single quote followed by one or two base format characters and then followed by a sequence of digits appropriate to the radix.
+\newline
+
+A literal that we do not size has a size of at least 32 bits and most implementations make it exactly 32 bits.
+\newline
+
+There must be no white space between the single quote character and the base format. The base format is not sensitive to character case and consists of a \textbf{b, o, d, h} characters to indicate the radix.
+\newline
+
+The Verilog-2001 update allows an optional preceding "s" character to indicate a signed value.
+\newline
+
+The digit sequence is not sensitive to character case and consists of digits  for the radix. For the binary, octal or hexadecimal radices, we can use the "z" and "x" characters for any of the digits. The Verilog-2001 update also permits a decimal value to be a single "z" or "x" character to indicate a value that is high impedance or all unknown.
+\newline
+
+Except for the first digit, we can insert underscore "\_" characters anywhere we nedd them to improve readability. 
+\newline
+
+We can substitute the "?" character for a "z" character. This will become obvious when we study the case statement.
+\newline
+
+\textcolor{red}* Appropriately sizing the literal avoids padding and truncation!
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Automatic Extension of Unsigned Literals}
+\scriptsize{
+For \textcolor{purple}{sized literals} (e.g. 2'b11):
+\begin{itemize}
+\item Verilog pads to left with 0 to match size of wider expression.
+\end{itemize}
+
+For \textcolor{purple}{unsized literals} (e.g. 'b11):
+\begin{itemize}
+\item Size is 32 bits.
+\item If leftmost digit is 1 or 0: 
+\begin{itemize}
+\scriptsize{
+	\item Verilog left-fills to make 32 bits and pads to left with 0 to match the size of wider expression.
+}
+\end{itemize}
+\item If leftmost digit is Z or X:
+\begin{itemize}
+\scriptsize{
+	\item Verilog left-fills with that leftmost digit to make 32 bits.
+	\item Verilog-1995 then pads to left with 0 to match size of wider expression.
+	\item Verilog-2001: then pads to left with that leftmost digit to match size of wider expression.
+}
+\end{itemize}
+\end{itemize}
+}
+
+\begin{multicols}{2}
+
+\begin{figure}
+    \includegraphics[width=0.35\textwidth]{img/04_ext0.png}
+\end{figure}
+\vfill
+
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_ext1.png}
+\end{figure}
+\end{multicols}
+
+\end{frame}
+
+\note{
+The Verilog 2001 standard permits signed based literals. The sign bit can be 0, 1, x or z. Verilog 2001 sign-extends signed based literals to match the width of the enclosing expression.
+\newline
+
+Verilog zero-extends unsigned based literals except in one situation. If the provided value has fever digits than what the size indicates and the leftmost bit is z or x, then Verilog extends the provided value with that z or x bit value up to the size of the literal. This made it easy to fill an entire vector with z or x.
+\newline
+
+The standard guarantees that the size of an unsigned literal is at least 32 bits and most implementations made it exactly 32 bits. The Verilog-2001 update continues to extend the z or x up to the width of the enclosing expression.
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Variable Vector Selection}
+\begin{multicols}{2}
+\scriptsize{
+\textcolor{red}{Bit-select}:
+\begin{itemize}
+\item A single bit-select index may be variable.
+\end{itemize}
+
+\textcolor{red}{Range-select}:
+\begin{itemize}
+\item In Verilog-1995, range-select indices must be constant.
+\item In Verilog-2001, a range-select can use a variable index and a constant width:
+\begin{itemize}
+\scriptsize{
+	\item Base expression (variable)
+	\item Width expression (constant)
+	\item Offset direction:
+	\begin{itemize}
+		\scriptsize{
+		\item Positive +
+		\item Negative -
+		}
+	\end{itemize}
+	\item Offset indicates if the width is added or substracted from the base:
+}
+\end{itemize}
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_offset.png}
+\end{figure}
+\vfill
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_selection.png}
+\end{figure}
+\end{multicols}
+
+\end{frame}
+
+\note{
+\scriptsize{
+Individual bits can be selected from a vector using a variable or expression index.
+\newline
+
+However in extracting a range of bits from a vector, Verilog-1995 requires that both bounds of the range are constants or constant expression. So a variable cannot be used in the extraction of a range of bits.
+\newline
+
+identifier {[msb\_constant\_expression:lsb\_constant\_expression]}
+\newline
+
+Verilog-2001 provides an alternative syntax that permits the starting point of a range select to be a variable expression, as long as the number of bits selected is a constant. In effect, to select a constant-width range from a variable starting bit position. The constant offset can be positive or negative from the starting point.
+\newline
+
+identifier {[base\_expression+:width\_constant\_expression]}
+\newline
+identifier {[base\_expression-:width\_constant\_expression]}
+\newline
+
+Where: \textit{base\_expression} is the variable starting bit position and \textit{width\_constant\_expression} is a constant plus or minus offset.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Declaring Nets}
 
 \end{frame}
 
