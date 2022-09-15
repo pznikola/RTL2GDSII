@@ -597,14 +597,245 @@ Where: \textit{base\_expression} is the variable starting bit position and \text
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Declaring Nets}
+\scriptsize{
+\begin{multicols}{2}
+Nets behave like physical wire. Values are driven onto them. Verilog has several net types.
+Most commonly used is \textbf{wire}.
 
+Verilog implicitly declares wires:
+\begin{itemize}
+\item Verilog-1995: Undeclared identifiers connected to instance ports.
+\item Verilog-2001: Also undeclared identifier driven by continuous assignment.
+\item Continuous assignments and instance output/inout ports drive nets.
+\item Change default with compiler directive:
+\begin{itemize}
+\scriptsize{
+	\item \begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{blue}{`default_nettype <nettype>}
+\end{Verbatim}
+}
+\end{itemize}
+\end{itemize}
+\vfill
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_declaring_nets.png}
+\end{figure}
+\end{multicols}
+}
 \end{frame}
+
+\note{
+\tiny{
+Nets are continuously driven by their drivers. Verilog automatically propagates a new value onto a net when the drivers of the net change value. A net driver can be a continuous assignment or a module or primitive output.
+\newline
+
+Verilog has various net types for modeling design-specific and technology-specific functionality. The most common net type is a \textbf{wire}.
+\newline
+
+Verilog implicitly declares wire nets in some contexts in which you use a net without first declaring it. We can override this with compiler directive:
+\begin{itemize}
+\item \textbf{`defaul\_nettype} \textit{$<$nettype$>$}
+\end{itemize}
+With this directive, such undeclared nets default to the net type you specify in the compiler directive. For this directive, Verilog-2001 adds the \textit{none} net type. In other words, this doesn't allow implicit net declarations.
+\newline
+
+\textbf{net Types Functionality}
+\begin{itemize}
+\item wire, tri: For standard interconnection wires (default)
+\item supply1: For power rails only in netlist
+\item supply0: For ground rails only in netlist
+\item wor, trior: For multiple drivers that are Wire-ORed
+\item wand, triand: For multiple drivers that are Wier-ANDed
+\item trireg: For nets with capacitive storage
+\item tri0, tri1: For nets that pull up or down when not driven
+\item uwire: Verilog-2005 unresolved wire accepts only one driver
+\end{itemize}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Undeclared Identifier in Verilog}
+\scriptsize{
+A net is inferred for undeclared identifier by default in Verilog-2001. What's the issue?
+\begin{itemize}
+\item \textit{svm} is undeclared, so defaults to a single bit wire (implicit wire)
+\item No compilation error/warning message
+\item \textit{sum} output port is undriven as so becomes value Z
+\item Mistyped identifier defaults to net/wire
+\end{itemize}
+What  is the solution?
+\begin{itemize}
+\item Check simulation carefully!
+\item Write self-checking simulations
+\item Use Verilog-2001 \begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{blue}{`default_nettype <nettype>}
+\end{Verbatim}
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.55\textwidth]{img/04_typo.png}
+\end{figure}
+\end{frame}
+\note{
+
+Along with type, even lower-case and upper-case identifiers (user-defined name of some such as the module, wire, variable, or the name of the function) are perceived as different in Verilog. If an identifier is typed in upper-case by mistake, and is used on the left-hand side of a continuous assignment, then an implicit net declaration is inferred, and no error or warning is reported.
+\newline
+
+No error/warning is reported if undeclared identifier is used for connecting an instance of a module (this makes design debug difficult).
+\newline
+
+For the compiler directive \textbf{`defaul\_nettype} \textit{$<$nettype$>$}, Verilog-2001 adds the \textit{none} net type for compiler directive. In other words, this doesn't allow any implicit net declarations.
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Usage of: \textbf{`default\_nettype} \textit{$<$nettype$>$}}
+\footnotesize{
+\begin{itemize}
+\item Implicit wires can be avoided by using the \textcolor{red}{`default\_nettype none} compiler directive.
+\item Any undeclared identifier is a compilation error/warning when this directive is used.
+\item Directive can affect the compilation of other files once turned on.
+\begin{figure}
+    \includegraphics[width=0.85\textwidth]{img/04_none.png}
+\end{figure}
+\item Explicit declaration of identifier type is needed to avoid the error. This can be: \newline
+\textcolor{red}{input wire a,b, output wire sum, carry}
+\end{itemize}
+}
+\end{frame}
+
+\note{
+When \textbf{`default\_nettype none} compiler directive  is used, implicit data types are disabled. This can make any undeclared identifier name a syntax error. Hence, as a limitation of this directive, benefits of implicit data types are lost. Another limitation is that once this directive is turned on in one file, then the compilation of other files gets affected. To avoid this, the directive \textbf{`default\_nettype wire} should be added at the end of each file where implicit nets have been turned off.
+
+}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Merging Net Declaration and Assignment}
+We can merge the net declaration and assignment - known as "net declaration assignment".
+\begin{multicols}{2}
+\begin{figure}
+    \includegraphics[width=0.35\textwidth]{img/04_merge.png}
+\end{figure}
+\vfill
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_merge_code.png}
+\end{figure}
+\end{multicols}
+\end{frame}
+
+\note{
+We can merge the net declaration with an assignment to make a \textit{net declaration assignment}.
+\newline
+
+The first example explicitly declares the wires \textbf{nsel, nsela, nselb} and later makes continuous assignments to them.
+\newline
+
+The second example merges the wire declaration with a continuous assignment. We can still make additional continuous assignments to the nets. Remember that a net can have multiple drivers.
+\newline
+
+Ports that we do not declare otherwise are by default single-bit wire nets. Both examples also show a continuous assignment to the output port wire net.
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Resolving Multiple Drivers of a Net}
+
+\scriptsize{
+\begin{multicols}{2}
+\begin{itemize}
+\item Multiple drivers can drive a net.
+\item Exception is Verilog-2005 \textbf{uwire}.
+\item Only a net can resolve the value of multiple drivers.
+\end{itemize}
+
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_multiple.png}
+\end{figure}
+\end{multicols}
+\vfill
+\begin{multicols}{3}
+Two names - same type
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=4]
+	wire y;
+	tri y;
+\end{Verbatim}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{img/04_multiple0.png}
+\end{figure}
+
+\vfill
+\columnbreak
+Two names - same type
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=4]
+	wand y;
+	triand y;
+\end{Verbatim}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{img/04_multiple1.png}
+\end{figure}
+
+\vfill
+\columnbreak
+Two names - same type
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=4]
+	wor y;
+	trior y;
+\end{Verbatim}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{img/04_multiple2.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+
+\note{
+\tiny{
+Verilog resolves the value of a net driven by multiple drivers. Assuming that the drivers all have the same strength:
+\begin{itemize}
+\item The conflict of 0 and 1 values on a \textbf{wire} net results in an unknown value.
+\item The conflict of 0 and 1 values on a wired-logic net results in a either 0 or a 1 value.
+\end{itemize}
+
+The \textbf{wire}, wired-and \textbf{wand}, and wired-or \textbf{wor} net types have two names. We can alternatively refer to them as \textbf{tri, triand} and \textbf{trior} types, respectively.
+\newline
+
+Net types \textbf{wire} and \textbf{tri} have identical functionality. They can be used in different names for better readability. That is, \textbf{tri} can be used in places when multiple drivers are present. Urban legend claims that the "tri" name exists to remind the user that they can assign high-impedance values to these nets. The urban legend neglects to explain the \textbf{tri0, tri1} and \textbf{trireg} nets that cannot have high-impedance value.
+\newline
+
+The wired-logic nets exist to model technology dependent logic conflict resolution:
+
+\begin{itemize}
+\item The wired-AND net to model open collector logic
+\item The wired-OR net to model emitter coupled logic
+\end{itemize}
+
+Verilog-2005 added the \textbf{uwire} net type, an unresolved wire that allows no more than one driver. For Cadence INCISIV simulator, the \textit{uwire} needs the -sv switch.
+
+}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Declaring Variables}
 
 \end{frame}
 
