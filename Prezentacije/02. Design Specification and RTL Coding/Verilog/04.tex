@@ -5,6 +5,9 @@
 % For tabs in verbatim
 \usepackage{fancyvrb}
 
+% Adjust position of the image
+\usepackage[export]{adjustbox}
+
 % set fonts
 \usefonttheme{professionalfonts} % using non standard fonts for beamer
 \usepackage{txfonts,mathptmx}
@@ -836,30 +839,176 @@ Verilog-2005 added the \textbf{uwire} net type, an unresolved wire that allows n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Declaring Variables}
+\scriptsize{
+Variables hold values that you procedurally assign. They keep the value until you assign a different value.
+\begin{itemize}
+\item \textbf{reg}: 4-state unsigned 1-bit
+\begin{itemize}
+	\item Can declare multi-bit vector
+	\item Verilog-2001 adds \textbf{reg signed}
+\end{itemize}
+\item \textbf{integer}: 4-state signed 32-bit
+\item \textbf{time}: 4-state unsigned 64-bit
+\item \textbf{real}: Double precision float
+\item \textbf{realtime}: Same as real
+\end{itemize}
+}
+
+\begin{multicols}{2}
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_var0.png}
+\end{figure}
+\vfill
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_var1.png}
+\end{figure}
+\end{multicols}
+\end{frame}
+
+\note{
+\scriptsize{
+A variable retains its value until we assign a new value to it.
+\begin{itemize}
+\item The \textbf{reg} type holds a four-state integral value. A \textit{reg} is by default unsigned but with Verilog-2001 update we can declare it signed. Arithmetic operations treat the value of a signed \textit{reg} as a signed value. A \textit{reg} is by default single bit wire, but we can declare an arbitrary range for it. The \textit{reg} is the most common variable type for hardware design.
+\item The \textbf{integer} type holds a four-state signed integral value. The standard guarantees it to be at least 32 bits and most implementations make it exactly 32 bits. Arithmetic operations treat the value of an \textit{integer} as a signed value.
+\item The \textbf{time} type holds a four-state unsigned integral value. The standard guarantees it to be at least 64 bits and most implementations make it exactly 64 bits. A \textit{time} is always unsigned. It is exactly the same as a 64-bit unsigned \textit{reg} vector. People typically use variables of this type to hold simulation time values.
+\item The \textbf{real} type holds a double-precision floating-point value as described by IEEE Std 754-1985 Binary Floating-Point Arithmetic.
+\item The \textbf{realtime} type is another name for \textit{real}. If we use it that way, we can use a \textit{realtime} to remind ourselves that its value is a real version of the simulation time.
+\end{itemize}
+
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Making Assignments to Variables}
+\begin{itemize}
+\item We read a variable's value from inside or outside a procedure.
+\item We write a variable's value only from inside a procedure.
+\item Within a procedure we write only to variables.
+\end{itemize}
+
+
+\begin{multicols}{2}
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_vars0.png}
+\end{figure}
+\vfill
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_vars1.png}
+\end{figure}
+\end{multicols}
 
 \end{frame}
 
+\note{
+A variable can appear anywhere that we read its value.
+\newline
+
+Assignments to variables are procedural assignments. They exist only as a procedural statement.
+\newline
+
+The first example erroneously attempts to make a procedural assignment to a net. Remember that a port is implicitly declared as a single bit net unless we declare it otherwise.
+\newline
+
+The second example explicitly declares the port to be a \textbf{reg}, but then erroneously attempts to make a continuous assignment to the variable.
+
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Assigning Between Integers and Vectors}
+\footnotesize{
+\textbf{Reminder}
+\begin{itemize}
+\item \textbf{reg}: 4-state unsigned 1-bit
+\begin{itemize}
+\footnotesize{
+	\item Can declare multi-bit vector
+	\item Verilog-2001 adds \textbf{reg signed}
+}
+\end{itemize}
+\item \textbf{integer}: 4-state signed 32-bit
+\end{itemize}
 
+Assignment between \textbf{reg} and \textbf{integer} follows previous rules:
+\begin{itemize}
+\item If value wider than target: Truncates value
+\item If value shorter than target:
+\begin{itemize}
+\footnotesize{
+	\item If unsigned value: zero-extends
+	\item If signed value: sign-extends
+}
+\end{itemize}
+\end{itemize}
+}
+
+\begin{figure}
+    \includegraphics[width=0.35\textwidth]{img/04_int2reg.png}
+\end{figure}
 \end{frame}
 
+\note{
+\scriptsize{
+We saw previously that Verilog truncates wide literal constants to fit shorter target widths and extends shorter literal constants to fit wider target widths, extending unsigned values with zero and signed values with sign bit. This is exactly the case also for assignments between \textit{integers} and \textit{vector reg} variables.
+\newline
+
+This example assigns the value 17 to an integer variable and assigns the integer to a 4-bit unsigned vector \textit{reg} variable. The assignment is a bit-for-bit replacement, so the vector \textit{reg} variable gets the value 1. Upon assigning the value of vector \textit{reg} variable to the integer variable, Verilog first zero-extends the value to match the width of the \textit{integer} variable, which is almost always 32 bits.
+\newline
+
+The example then assigns the value -3 to the integer variable and assigns the integer to the 4-bit vector \textit{reg} variable. The assignment is a bit-for-bit replacement, so the unsigned vector \textit{reg} variable gets the value 13. The sign is lost. Upon assigning the value of the vector \textit{reg} variable to the integer variable, Verilog zero-extends the value to match the width of the integer variable.
+
+}
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Declaring Arrays of Nets and Variables}
+\scriptsize{
+Verilog-1995 supports one-dimensional arrays of \textbf{integer}, \textbf{reg} and \textbf{time}.
+\begin{figure}
+    \includegraphics[width=0.85\textwidth, left]{img/04_array0.png}
+\end{figure}
 
+\begin{itemize}
+\item We access one element (word) at a time by indexing to that word.
+\item We cannot directly take bit or par selects of a word (use an intermediate variable)
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.85\textwidth, left]{img/04_array1.png}
+\end{figure}
+
+Verilog-2001 supports multi-dimensional arrays of \textbf{integer}, \textbf{real}, \textbf{realtime}, \textbf{reg}, \textbf{time} and \textbf{nets}.
+\begin{figure}
+    \includegraphics[width=0.85\textwidth, left]{img/04_array2.png}
+\end{figure}
+\begin{itemize}
+\item We can directly take bit and part selects of an indexed element
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.85\textwidth, left]{img/04_array3.png}
+\end{figure}
+}
 \end{frame}
 
+\note{
+\footnotesize{
+As with programming languages, Verilog supports arrays:
+\begin{itemize}
+\item The Verilog-1995 standard permits one-dimensional arrays of \textbf{integer}, \textbf{reg} and \textbf{time}. The \textit{reg} elements can be either single-bit elements or vector \textit{reg} elements. People refer to an array of vector \textit{reg} elements as a Verilog "memory". The Verilog-2001 standard supports arrays of \textbf{integer, time, reg, real, realtime} and even \textbf{nets}, and they can have any number of dimensions.
+\item The Verilog-1995 standard did not accommodate directly taking a bit-select or a part-select of an indexed memory element. We had to extract the element to a variable and then take a bit-select or part-select of the variable. The Verilog-2001 standard accommodate directly taking bit-select or a part-select of an indexed memory element.
+\end{itemize}
+
+}
+}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
+\frametitle{Declaring Module Parameters}
 
 \end{frame}
 
