@@ -1009,13 +1009,306 @@ As with programming languages, Verilog supports arrays:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Declaring Module Parameters}
+\begin{multicols}{2}
 
+A module \textcolor{purple}{parameter} is an instance specific constant:
+\footnotesize{
+\begin{itemize}
+\item Parametrizes the module definition (width, depth, frequency, time, etc.)
+\item Can override for each individual instance 
+\end{itemize}
+}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_param0.png}
+\end{figure}
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_param1.png}
+\end{figure}
+
+\end{multicols}
+\end{frame}
+
+\note{
+\scriptsize{
+Module parameters that we declare with \textit{parameter} keyword are constants that we can change for each instance of the module, thus we can use them to "parametrize" the instance, for example, to establish different widths and depths for each instance of a memory module. Parameters are not variables, so we cannot change them during simulation run time.
+\newline
+
+The first example on the slide uses the Verilog-1995 \textit{list of ports} syntax and declares the ports later as a module item. Before declaring ports, t declares a module parameter to establish the port width and sets the parameter's default value to 2. We can modify this parameter for each individual instance of the module.
+\newline
+
+The second example uses the Verilog-2001 \textit{list of port declarations} syntax. The example needs to declare the parameter before ports because it uses the parameter value to establish port width. It declares the parameter using the Verilog-2001 \textit{module parameter port list} syntax.
+\newline
+
+The Verilog-1995 syntax does not require a type declaration for a parameter - the parameter assumes the type of its initial value and we can change its type upon module instantiation by providing it a value of a different type. The Verilog-2001 syntax permits a type declaration for a parameter and any new value we provide must be of that type.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Local parameters and Parameter Passing}
+
+\scriptsize{
+\begin{multicols}{2}
+Localparams are true constants. unlike parameters, localarams cannot be overridden from the next level of hierarchy.
+\newline
+
+Use of constants that should never be overridden upon instantiation:
+\begin{itemize}
+\item For a module that is not instantiated (testbench?)
+\item For "enumerations" (FSM states?)
+\end{itemize}
+Verilog-2001 provides three ways to override module parameters:
+\begin{itemize}
+\item Redefinition using \textbf{defparam}
+\item Positional parameter override during instantiation
+\item Named parameter override during instantiation (new in Verilog-2001)
+\end{itemize}
+\textcolor{red}* Parameter override using defparam can be difficult to track
+
+\columnbreak
+
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/04_param2.png}
+\end{figure}
+
+\end{multicols}
+}
+\end{frame}
+
+\note{
+\tiny{
+The Verilog-2001 update provides the \textbf{localparam} construct - exactly like a parameter except that we cannon change it. For a module parameter that should not change on a per-module basis, we should use the \textit{localparam} keyword instead of the \textit{parameter} keyword.
+\newline
+
+To modify the parameters of a module instance, we can make a \textit{parameter value assignment} upon instantiating the module. A parameter value assignment is a parenthesized list of parameter assignments before the module instance name and prefixed with a hash ("\#") character. We may see the hash character used in other context to specify propagation delay, but in the context of a module instantiation, it is a parameter value assignment or parameter value override during instantiation.
+\newline
+
+Out list of parameter assignments can use either the Verilog-1995 ordered parameter assignment syntax or the Verilog-2001 named parameter assignment syntax, but we cannot mix the two syntaxes in the same instantiation. These syntaxes are similar to the ordered and named port connection syntax, but with the ordered parameter assignment syntax, we cannot merely insert a comma as a place holder - we need to provide values for all earlier parameters of we want to provide a value for a later parameter. This example uses the ordered parameter assignment syntax, but we should in general use the named parameter assignment syntax to make our code more readable.
+\newline
+
+We can also override a parameter value by using \textbf{defparam} statement. A parameter can be modified using the \textit{defparam} statement during compilation time. We can make this override from anywhere in the design by using a hierarchical parameter name. Our use of this override is superfluous when done locally and can potentially cause much confusion when not done locally as it might be difficult to track.
+\newline
+
+\textit{localparam} cannot be directly modified by \textit{defparam} statements. \textbf{Specparam} provides timing and delay values and can be modified through SDF annotation only (Refer appendix C for SDF annotation).
+
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Summary}
+A net behaves like a physical wire driven by logic:
+\begin{itemize}
+\item Implicitly declared nets default to type wire
+\item We drive nets by continuous assignments and by module and primitive outputs
+\end{itemize}
+A variable stores a value:
+\begin{itemize}
+\item We update a variable only by a procedural assignment
+\item We make a procedural assignment only to a variable
+\item Assignment between \textbf{integer} and \textbf{reg} ignore sign.
+\end{itemize}
+Expressions that read nets and variables can exist inside or outside procedures.
+A module port we do not declare otherwise is implicitly declared \textbf{wire}.
+\begin{itemize}
+\item Input ports are nets driven externally by nets and/or variables.
+\item Inout ports are nets connected externally to nets.
+\item Output ports are nets or variables externally driving nets.
+\end{itemize}
+\end{frame}
+
+\note{
+This module examined the Verilog value set and data types. It explored nets, variables, and a form of a constant called a parameter.
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Review}
+\begin{enumerate}
+\item What are the four logic values in the Verilog value set?
+\item Rewrite the binary value 8'b11010011 in hexadecimal.
+\item How many bits wide is the integer type?
+\item What is the primary difference between a net and a variable?
+\end{enumerate}
+\end{frame}
+
+\note{
+\begin{enumerate}
+\item What are the four logic values in the Verilog value set?
+\begin{itemize}
+	\item 0 1 Z X
+\end{itemize}
+\item Rewrite the binary value 8'b11010011 in hexadecimal.
+\begin{itemize}
+	\item 8'hd3
+\end{itemize}
+\item How many bits wide is the integer type?
+\begin{itemize}
+	\item 32
+\end{itemize}
+\item What is the primary difference between a net and a variable?
+\begin{itemize}
+	\item A net is continuously driven, behaving like a physical wire driven by logic. A variable represents storage, storing a value until a new one is assigned. In the language, we can assign variables only from procedural statements and nets only from continuous assignments.
+\end{itemize}
+\end{enumerate}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Exercise}
+Code this two-input AND operation using a:
+\begin{enumerate}
+\item \textbf{wire}
+\item \textbf{reg}
+\end{enumerate}
+\begin{figure}
+    \includegraphics[width=0.25\textwidth]{img/04_exercise.png}
+\end{figure}
+\end{frame}
+
+\note{
+Solution:
+
+\begin{figure}
+    \includegraphics[width=0.25\textwidth]{img/04_exercise0.png}
+\end{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+Lab 5-1: Modeling a Data Driver
+\begin{itemize}
+\item Use a Verilog literal value while describing a parametrized-width bus driver.
+\end{itemize}
+
+\begin{figure}
+    \includegraphics[width=0.35\textwidth]{img/04_lab.png}
+\end{figure}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Test Your Understanding - 1}
+The simulator reports a signal state as "X". This means that the signal state is:
+\begin{itemize}
+\item[$\square$] unknown
+\item[$\square$] randomly both binary 0 and 1
+\item[$\square$] high impedance
+\item[$\square$] unresolved either binary 0 or 1
+\end{itemize}
 \end{frame}
+
+\note{
+The simulator reports a signal state as "X". This means that the signal state is:
+\begin{itemize}
+\item[$\boxtimes$] unknown
+\item[$\square$] randomly both binary 0 and 1
+\item[$\square$] high impedance
+\item[$\square$] unresolved either binary 0 or 1
+\end{itemize}
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 2}
+While describing our design we can use a range of net types including:
+\begin{itemize}
+\item[$\square$] pull1
+\item[$\square$] tri1
+\item[$\square$] trireg
+\item[$\square$] triand
+\item[$\square$] supply1
+\item[$\square$] tri
+\end{itemize}
+\end{frame}
+
+\note{
+While describing our design we can use a range of net types including:
+\begin{itemize}
+\item[$\square$] pull1
+\item[$\boxtimes$] tri1
+\item[$\boxtimes$] trireg
+\item[$\boxtimes$] triand
+\item[$\boxtimes$] supply1
+\item[$\boxtimes$] tri
+\end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 3}
+We want to declare a 4-bit vector. Which range specification(s) can we use?
+\begin{itemize}
+\item[$\square$] {[0:3]}
+\item[$\square$] {[3:0]}
+\item[$\square$] {[1:4]}
+\item[$\square$] {[4:1]}
+\item[$\square$] {[2:-1]}
+\item[$\square$] {[-1:2]}
+\end{itemize}
+\end{frame}
+
+\note{
+We want to declare a 4-bit vector. Which range specification(s) can we use?
+\begin{itemize}
+\item[$\boxtimes$] {[0:3]}
+\item[$\boxtimes$] {[3:0]}
+\item[$\boxtimes$] {[1:4]}
+\item[$\boxtimes$] {[4:1]}
+\item[$\boxtimes$] {[2:-1]}
+\item[$\boxtimes$] {[-1:2]}
+\end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 4}
+We have used an unsized integer literal in an expression. The elaborator inserts a value of a size that is at least:
+\begin{itemize}
+\item[$\square$] 32
+\item[$\square$] 64
+\item[$\square$] 16
+\item[$\square$] 8
+\end{itemize}
+\end{frame}
+
+\note{
+We have used an unsized integer literal in an expression. The elaborator inserts a value of a size that is at least:
+\begin{itemize}
+\item[$\boxtimes$] 32
+\item[$\square$] 64
+\item[$\square$] 16
+\item[$\square$] 8
+\end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 5}
+We declared an inout port associated with an internal module item. We can make a procedural assignments to that item?
+\begin{itemize}
+\item[$\square$] True
+\item[$\square$] False
+\end{itemize}
+\end{frame}
+
+\note{
+We declared an inout port associated with an internal module item. We can make a procedural assignments to that item?
+\begin{itemize}
+\item[$\square$] True
+\item[$\boxtimes$] False
+\end{itemize}
+
+}
 
 \end{document}
