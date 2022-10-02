@@ -414,37 +414,349 @@ This example is functionally identical to the previous example, but uses the z c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Alternative Case Statement Form}
+\scriptsize{
+\begin{multicols}{2}
+\begin{itemize}
+\item \textcolor{purple}{case} item match can be an expression as well
+\item Case item match expression does not have to be a constant value!
+\item Can use case statement to match \textit{variable} expressions
+\item Case items are prioritized according to the order
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_alt.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\tiny{
+Alternate \textbf{case} statement syntax:
 
+case (expression)
+
+expression \{ , expression \} : statement
+
+\{expression \{ , expression \} : statement \}
+
+[ default [:] statement ]
+
+endcase
+\newline
+
+Unlike most programming languages, the Verilog case item expression does not have to be a constant.
+\newline
+
+This example is functionally identical to the previous example, but tests which match expression first matches the value 1, that is, which on is the first "true" expression.
+\newline
+
+case (1'b1)
+
+  en\_a : op = a;
+  
+  en\_b : op = b;
+   
+  en\_c : op = c;
+    
+endcase
+\newline
+
+In the above code, the case statement en\_a has a highest priority. The statement checks for en\_a first. If this is 1'b1, then the output op is a. Otherwise it checks for en\_b. If en\_b is 1'b1 then output op is equal to b. When both en\_a and en\_b are not 1'b1, then en\_c is checked. If en\_c is 1'b1 then output op = c.
+
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Making Loop Statements: while}
+\scriptsize{
+\begin{multicols}{2}
+\begin{itemize}
+\item \textcolor{purple}{while} loop iterates and executes its following statement while the expression is known and non-zero
+\item Must previously declare any variables used in expression
+\item While expression is known and true, executes expression.
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_while.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\scriptsize{
+\textcolor{purple}{while} (expression)
+statement
+\newline
+
+The \textbf{while} loop executes its following statement while the expression is known and non-zero. The following statement is usually a statement block but does not have to be. if the expression is not known or is zero, then the following statement never executes.
+\newline
+
+The 1st illustration executes a statement block while the count is known and less then 10. The last statement of the block increments the count. Some statement before the loop presumably initializes the count, bit this is not shown.
+\newline
+
+The 2nd illustration counts the number of bits in the tempreg that are 1. While the "tempreg" is known and non-zero, if the least significant bit of the \textit{tempreg} is known and non-zero it increments the count. In any case, each loop iteration shifts the \textit{tempreg} one position to the right.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Making Loop Statements: for}
+\scriptsize{
+\begin{multicols}{2}
+\begin{itemize}
+\item \textcolor{purple}{for} loop requires prior declaration of any variables used in expressions
+\item Initialization is done for the loop
+\item Condition checked
+\item while condition is known true, executes statement(s)
+\item Update expression is then executed ad end of each iteration
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_for.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\scriptsize{
+\textcolor{purple}{for} (initializer exp; condition exp; update exp)
+statement
+\newline
+
+
+We can more concisely rewrite a \textit{while} loop as a \textit{for} loop that is not as complex. The \textit{for} loop performs the initial variable assignment and then while the test expression is known and non-zero executes the following statement. The following statement is usually a statement block but does not have to be. After each iteration of its following statement, the \textit{for} loop executes the second variable assignment. The two variable assignments are almost always to a variable that participates in the test expression, but they don't have to be.
+\newline
+
+This example calculates the parity of an input vector reg. The for loop initializes the index to 0 ad while the index is less than or equal to 3 it exclusive-ORs the partial result with each  indexed bit of the input, each time incrementing the index value by 1.
+\newline
+
+If we think for a moment, we can think of an operator that will do this one assignment without a loop. The same for loop can also be implemented using an equivalent while loop. The syntax is:
+
+Initializer exp;
+
+while (condition exp)
+
+statement;
+
+update exp;
+
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Making Loop Statements: repeat}
+\scriptsize{
+\begin{multicols}{2}
+\begin{itemize}
+\item \textcolor{purple}{repeat} loop executes the statements number of times specified in the loop
+\item Must previously declare any variables used in expression
+\item For expressed count executes statement
+\item The \textbf{repeat} loop is equivalent to a \textbf{for} loop with the index variable automatically declared, initialized and incremented.
+
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_repeat.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\scriptsize{
+\textcolor{purple}{repeat} (expression)
+statement
+\newline
+
+We can more concisely rewrite a for loop as a \textit{repeat} loop, where we do not need to use the index, for example, to select a bit of a vector. A \textit{repeat} loop executes its following statement the number of times specified by its parenthesized expression.
+\newline
+
+This example multiplies two 4-bit inputs to produce an 8-bit output. Because it uses a shift multiplier implementation, it does not need a loop index, so uses a \textit{repeat} loop instead of a \textit{for} loop. Equivalent logic can be optained using for loop as well. The syntax would be:
+\newline
+
+integer h; // hidden index
+
+for (h = 0; h \textless\ expression; h = h + 1)
+
+statement
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Making Loop Statements: forever}
+\begin{itemize}
+\item \textcolor{purple}{forever} loop executes statement forever
+\end{itemize}
+
+
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{reg} clock;
+\textcolor{purple}{initial}
+  \textcolor{purple}{forever}
+    \textcolor{magenta}{#}\textcolor{purple}{10} clock = !clock;
+\end{Verbatim}
+\end{frame}
+\note{
+\textcolor{purple}{forever} statement;
+\newline
+
+Verilog also provides a forever loop for when we need to repeat execution of a statement an essentially infinite number of times or until simulation ends. The same logic can be modeled using the while loop as well. The syntax would be:
+\newline
+
+while(1)
+
+statement
+
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Summary}
+\scriptsize{
+Now we can appropriately and correctly describe design behaviour procedurally.
+\newline
+
+In this module, we studied:
+\begin{itemize}
+\item The \textbf{initial} and \textbf{always} construct introduce procedural blocks.
+\item The \textbf{@} event control blocks further procedural block execution until an event occurs
+\item The \textbf{=} procedural assignment that is inside a procedural block we make only to variables
+\item The \textbf{if-else}, and \textbf{case/casex/casez} procedural branching statements
+\item The \textbf{for, while, repeat} and \textbf{forever} procedural looping statements.
+\end{itemize}
+}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Module Review}
+\begin{enumerate}
+\item If more than one case item expression matches the case expression, which associated statement(s) execute?
+\item Can we use the \textbf{case, if} and \textbf{for} statements in continuous assignments.
+\end{enumerate}
+\end{frame}
+\note{
+\begin{enumerate}
+\item If more than one case item expression matches the case expression, which associated statement(s) execute?
+\begin{itemize}
+	\item The case expression is compared to the case item expressions in the order they appear and the statement associated with only the first match is executed.
+\end{itemize}
+\item Can we use the \textbf{case, if} and \textbf{for} statements in continuous assignments.
+\begin{itemize}
+	\item The \textbf{case, if} and \textbf{for} statements are procedural statements that cannot appear in a continuous assignment.
+\end{itemize}
+\end{enumerate}
 
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Exercise 1}
+Code the following conditional logic as a procedural block:
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_ex1.png}
+\end{figure}
+\end{frame}
+
+\note{
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_ex1s.png}
+\end{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Exercise 2}
+\begin{figure}
+    \includegraphics[width=0.65\textwidth]{img/06_ex2.png}
+\end{figure}
+\end{frame}
+\note{
+\begin{figure}
+    \includegraphics[width=0.85\textwidth]{img/06_ex2s.png}
+\end{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+Lab 7-1: Modeling a Controller
+\begin{itemize}
+\item Use the Verilog \textbf{case} statement to describe a controller
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/06_lab.png}
+\end{figure}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Test Your Understanding - 1}
+We are coding a conditional statement. We remember that if the expression value is not known then:
+\begin{itemize}
+\item[$\square$] first branch executes
+\item[$\square$] both branches executes
+\item[$\square$] second branch executes
+\item[$\square$] neither branch executes
+\end{itemize}
 \end{frame}
+\note{
+We are coding a conditional statement. We remember that if the expression value is not known then:
+\begin{itemize}
+\item[$\square$] first branch executes
+\item[$\square$] both branches executes
+\item[$\boxtimes$] second branch executes
+\item[$\square$] neither branch executes
+\end{itemize}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Test Your Understanding - 2}
+We want to definitively test for a high-impedance output from the DUT. Which one or more statements can do that?
+\begin{itemize}
+\item[$\square$] casex
+\item[$\square$] case
+\item[$\square$] if
+\item[$\square$] casez
+\end{itemize}
 \end{frame}
+\note{
+We want to definitively test for a high-impedance output from the DUT. Which one or more statements can do that?
+\begin{itemize}
+\item[$\square$] casex
+\item[$\boxtimes$] case
+\item[$\square$] if
+\item[$\square$] casez
+\end{itemize}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Test Your Understanding - 3}
+We can use the case, if and for statements in continuous assignment. Is it?
+\begin{itemize}
+\item[$\square$] True
+\item[$\square$] False
+\end{itemize}
 \end{frame}
+\note{
+We can use the case, if and for statements in continuous assignment. Is it?
+\begin{itemize}
+\item[$\square$] True
+\item[$\boxtimes$] False
+\end{itemize}
+}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
 
-\end{frame}
 
 \end{document}
