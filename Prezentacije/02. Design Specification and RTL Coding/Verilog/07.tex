@@ -69,14 +69,36 @@ Out objective is to correctly choose between blocking and non-blocking assignmen
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
+\begin{frame}[fragile]
+\frametitle{Blocking Assignment Introduction}
 
+A blocking assignment blocks further execution until complete.
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{		variable = [delay_control] expression}
+\textcolor{purple}{		variable = [event_control] expression}
+\end{Verbatim}
+\begin{itemize}
+\item By default completes immediately
+\end{itemize}
+
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/07_block.png}
+\end{figure}
 \end{frame}
+\note{
+\scriptsize{
+The simulator executes a blocking assignment by evaluating the right-side expression, retaining its value, and blocking further execution of the block until it updates the left-side variable. If the assignment includes an intra-assignment timing control, then the simulator updates the variable after timing control expires, and then continues block execution. If the assignment does not include intra-assignment timing control, then the simulator updated the variable immediately.
+\newline
+
+In this example, the \textit{for} loop increments the \textit{seq} signal every 10 time units. The update occurs before the next statement executes. The next statement tests the new value, and if the new value is 4, immediately resets it to 0. The value 4 has no duration, so does not appear in the sequence of monitored values.
+
+
+}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Blocking Assignments in Sequential Procedures}
 
 \end{frame}
 
