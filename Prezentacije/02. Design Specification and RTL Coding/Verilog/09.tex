@@ -488,19 +488,332 @@ $|$ event\_expression \textbf{,} event\_expression
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
+\begin{frame}[fragile]
+\frametitle{Synchronizing Procedures: level-Sensitive Event Controls}
+\scriptsize{
+\begin{multicols}{2}
+Use a \textcolor{purple}{wait} statement for level-sensitive timing control in behavioural code:
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{		\textbf{wait (expr)} statement}
+\end{Verbatim}
 
+When the statement executes:
+\begin{itemize}
+\item If the expression is known and true, it does not suspend the process
+\item If the expression is unknown or false, it does suspend the process until the expression is known and true
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/09_sync_proc_level.png}
+\end{figure}
+\end{multicols}
+}
 \end{frame}
+\note{
+\scriptsize{
+Use a \textit{wait} statement for level-sensitive timing control in behavioural code, If upon executing the \textit{wait} statement the expression is already true the statement does not block. If upon executing the \textit{wait} statement the expression is not true then the statement does block, and then unblocks if and when the expression becomes true.
+\newline
 
+In this example, the procedural block blocks upon every execution until an event occurs on its \textit{a} or \textit{b} inputs. When one of these events occurs, the procedural block tests the state of the enable (\textit{enb}) input, and if the enable input is not 1 then the procedural block again blocks until the enable input becomes 1. While the procedural block is waiting for the enable input to become 1 it misses any further events on the \textit{a} or \textit{b} inputs, as it is not \textit{waiting} for then.
+\newline
+
+The wait statement blocks if the expression is not true and then unblocks when the expression becomes true.
+
+}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Synchronizing Procedures: Delay Control}
+\scriptsize{
+\begin{multicols}{2}
+Use a delay control for a simple time delay:
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{	# delay_value}
+\textcolor{purple}{	# ( expr )}
+\textcolor{purple}{	# ( expr:expr:expr)}\textcolor{blue}{ // min:typ:max}
+\end{Verbatim}
+\begin{itemize}
+\item For modeling propagation delay
+\item For generating a clock
+\item For stepping the testbench
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/09_sync_proc_delay.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\scriptsize{
+Use a delay control for a simple time delay for modeling propagation delay, generating a clock and stepping the testbench. If the delays are constants then we can use module parameters to propagate the constants through the hierarchy.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Example Timing Controls}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/09_timing_control.png}
+\end{figure}
+\end{frame}
+\note{
+\tiny{
+This example illustrates a collection of timing controls.
+\newline
+
+The response procedure does the following:
+\begin{enumerate}
+\item It waits for "set" to be 1, ignoring the positive clock edge at time 10.
+\item After "set" is 1 at time 15, it waits for the positive clock edge.
+\item After the positive clock edge at time 30 it waits 3 time units before setting "q" to 1.
+\item After setting "q" to 1 at time 33 it waits 10 time units before setting "q" to 0.
+\item After setting "q" to 0 at time 43 it waits for "set" to be 0.
+\item After "set" is 0 at time 48 it again waits for "set" to be 1.
+\item "set" is 1 at time 70, coincident with the positive clock edge. Both assignment statements are on the active evaluate queue. Update to the "set" variable unblocks the response procedure and places it on the active evaluate queue, normally but not necessarily at the end of the queue, so the response procedure normally resumes execution after the positive clock edge has occurred and must wait for the next positive clock edge.
+\end{enumerate}
+This illustration provides good arguments for synchronizing stimulus to the clock:
+\begin{enumerate}
+\item The stimulus does not utilize the clock period constant. The stimulus causes greatly different results upon changing the clock period.
+\item The stimulus is not synchronized to the clock. If the stimulus is synchronized to the clock,then we know that when the "set" signal transitions, the clock has already occurred and no race condition exist.
+\end{enumerate}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Compiler Directive `timescale Preview}
+\scriptsize{
+\begin{multicols}{2}
+The \textcolor{purple}{`timescale} compiler directive specifies the time unit and time precision for all following modules.
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{		`timescale unit/precision}
+\end{Verbatim}
+\begin{itemize}
+\item Can appear only outside module descriptions.
+\item Time values in a module are rounded to the precision of that module.
+\item The overall simulation time precision is the smallest precision that any module specified.
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/09_timescale.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\tiny{
+The \textit{`timescale} directive specifies the time unit and time precision for subsequent module declarations. Any expression used in a context to mean simulation time will assume the time unit of the current module and be rounded to the time precision of the current module. System tasks that display simulation time will scale the display to the time unit of the current module.
+\newline
+
+As the standard does not prescribe a default time scale, for interoperability, either all modules must be subject to a time scale or no module can be subject to a time scale. To ensure that all modules are subject to a time scale, we should get used to specifying a time scale at the top of every file, even if we not use time specifications in the file. To modify a time scale, we need to edit the file and recompile that file and all other files that utilized that directive. No method exists to modify a time scale during simulation.
+\newline
+
+`timescale time\_unit/time\_precision
+
+\begin{itemize}
+\item The \textit{time\_unit} argument specifies the assumed time for time values
+\item The \textit{time\_precision} argument cannot be larger than the \textit{time\_unit} argument.
+\item Time values are rounded to meed the current precision specification.
+\item The overall simulation time precision is the smallest specified time precision.
+\item The integer part of the arguments specify a magnitude (1, 100, 1000) and the character string argument suffix is the unit (s, ms, us, ns, ps, fs).
+\end{itemize}
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Summary}
+Now we can produce higher quality code less affected by non-determinism and race conditions.
+\newline
+
+This module described:
+\begin{itemize}
+\item Procedural \textbf{initial} and \textbf{always} blocks
+\item Blocking \textbf{=} procedural assignment
+\item Non-blocking \textbf{\textless =} procedural assignment
+\item The simulation cycle (delta cycles)
+\item Timing control
+\begin{itemize}
+	\item The \textbf{@} event control
+	\item The \textbf{wait} level-sensitive event control
+	\item The \textbf{\#} delay control
+\end{itemize}
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+Our objective is to produce higher quality code less subject to indeterminacy and race conditions. To do that, we need to understand something about how the simulator executes processes and their statements.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Review}
+\begin{enumerate}
+\item When does the variable vale change when using a:
+\begin{itemize}
+	\item blocking assignments
+	\item non-blocking assignments
+\end{itemize}
+\item What are the three Verilog Timing controls?
+\item What Verilog construct do you use in a procedure to advance simulation time?
+\item Where can you place the \textbf{`timescale} compiler directive?
+\end{enumerate}
+\end{frame}
+\note{
+\tiny{
+\begin{enumerate}
+\item When does the variable vale change when using a:
+\begin{itemize}
+	\tiny{
+	\item blocking assignments
+	\begin{itemize}
+	\tiny{
+		\item A blocking assignment blocks execution of subsequent statements of the procedure until the assignment completes, which is by default immediately.
+	}
+	\end{itemize}
+	\item non-blocking assignments
+	\begin{itemize}
+	\tiny{
+		\item A non-blocking assignment schedules assignment completion for the "update" phase of delta cycle, by default the current cycle.
+	}
+	\end{itemize}
+	}
+\end{itemize}
+\item What are the three Verilog Timing controls?
+\begin{itemize}
+	\tiny{
+		\item The \textbf{@} event control, the \textbf{wait} level-sensitive event control, the \textbf{\#} delay control.
+	}
+\end{itemize}
+\item What Verilog construct do you use in a procedure to advance simulation time?
+\begin{itemize}
+	\tiny{
+		\item The \textbf{\#} delay control suspends the procedure for a specified simulation time.
+	}
+\end{itemize}
+\item Where can you place the \textbf{`timescale} compiler directive?
+\begin{itemize}
+	\tiny{
+		\item In the source code outside any module definition. The Verilog standard implies but not does explicitly specify this by saying it applies to "modules that follow" and always showing it outside example modules.
+	}
+\end{itemize}
+\end{enumerate}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+Lab 10-1 Modeling a Generic Counter
+\begin{itemize}
+\item Use blocking and non-blocking assignments while describing a counter.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/09_lab.png}
+\end{figure}
+\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Test Your Understanding - 1}
+In which order does the simulator processes these regions of the stratifies event queue?
+\begin{itemize}
+\item[$\square$] inactive, active, monitor, NBA
+\item[$\square$] monitor, inactive, active, NBA
+\item[$\square$] inactive, active, NBA, monitor
+\item[$\square$] active, inactive, monitor, NBA
+\item[$\square$] active, inactive, NBA, monitor
+\end{itemize}
 \end{frame}
+\note{
+In which order does the simulator processes these regions of the stratifies event queue?
+\begin{itemize}
+\item[$\square$] inactive, active, monitor, NBA
+\item[$\square$] monitor, inactive, active, NBA
+\item[$\square$] inactive, active, NBA, monitor
+\item[$\square$] active, inactive, monitor, NBA
+\item[$\boxtimes$] active, inactive, NBA, monitor
+\end{itemize}
+}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 2}
+For which procedural assignment does the simulator update "lvalue" in the same simulation cycle that it evaluates the "rvalue" if a "simulation cycle" is the processing of currently active events as defined for the stratified event queue?
+\begin{itemize}
+\item[$\square$] \#0 lvalue = rvalue;
+\item[$\square$] \#0 lvalue \textless = rvalue;
+\item[$\square$] lvalue \textless = \#0 rvalue;
+\item[$\square$] lvalue = \#0 rvalue;
+\end{itemize}
+\end{frame}
+\note{
+For which procedural assignment does the simulator update "lvalue" in the same simulation cycle that it evaluates the "rvalue" if a "simulation cycle" is the processing of currently active events as defined for the stratified event queue?
+\begin{itemize}
+\item[$\boxtimes$] \#0 lvalue = rvalue;
+\item[$\square$] \#0 lvalue \textless = rvalue;
+\item[$\square$] lvalue \textless = \#0 rvalue;
+\item[$\square$] lvalue = \#0 rvalue;
+\end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 3}
+Which one or more of these are syntactically valid procedures?
+\begin{itemize}
+\item[$\square$] always begin c = $\sim$ c; \#1 end
+\item[$\square$] always begin \#1 c = $\sim$ c; end
+\item[$\square$] always begin \#1; c = $\sim$ c; end
+\item[$\square$] always begin c = $\sim$ c; \#1; end
+\end{itemize}
+\end{frame}
+\note{
+Which one or more of these are syntactically valid procedures?
+\begin{itemize}
+\item[$\square$] always begin c = $\sim$ c; \#1 end
+\item[$\boxtimes$] always begin \#1 c = $\sim$ c; end
+\item[$\boxtimes$] always begin \#1; c = $\sim$ c; end
+\item[$\boxtimes$] always begin c = $\sim$ c; \#1; end
+\end{itemize}
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test Your Understanding - 4}
+You code a wait(1) level-sensitive event control to:
+\begin{itemize}
+\item[$\square$] wait because its argument is true
+\item[$\square$] wait one time unit
+\item[$\square$] wait one simulation cycle
+\item[$\square$] not wait because its expression is true
+\end{itemize}
+\end{frame}
+\note{
+You code a wait(1) level-sensitive event control to:
+\begin{itemize}
+\item[$\square$] wait because its argument is true
+\item[$\square$] wait one time unit
+\item[$\square$] wait one simulation cycle
+\item[$\boxtimes$] not wait because its expression is true
+\end{itemize}
+
+}
 
 
 
