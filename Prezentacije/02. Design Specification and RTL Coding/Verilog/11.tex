@@ -426,61 +426,164 @@ We implicitly declare a net when we use a previously undeclared identifier in a 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Reference: Compiler Directives}
-
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/11_reference.png}
+\end{figure}
 \end{frame}
 \note{
+\tiny{
+Use the \textit{`celldefine} and \textit{`endcelldefine} to tag modules as technology cells. PLI applications such as delay calculators and power calculators query this tag to determine the design hierarchy leaf cells that have a physical implementation.
+\newline
+
+Use the \textit{`default\_nettype} directive to set the default net type for implicitly declared nets. This is by default the \textbf{wire} type but we can set it to any net type. The Verilog 2001 standard adds the argument \textit{none} which prevents implicitly declared nets.
+\newline
+
+Use the \textit{`define} directive to define a text replacement macro and the \textit{`undef} directive to undefine it.
+\newline
+
+Use the \textit{`ifdef, `else, `endif} directives to conditionally compile source text depending upon the existence of a text macro. The Verilog 2001 standard adds the \textit{`ifndef} and \textit{`elsif} directives.
+\newline
+
+Use the \textit{`include} directive to insert the contents of a source file at the point of the directive. The argument to the directive is a quoted file name. no standard way exists to generate the file name.
+\newline
+
+Use the \textit{`resetall} directive to reset all compiler directives back to their initial state. This is very useful and recommended for placing at the beginning of every source file to ensure that ony the directive set by that file are in effect during parsing of the file. This directive affects the \textit{`celldefine, `default\_nettype, `timescale} and \textit{`unconnected\_drive} directives. It does not undefine text macros, so our file can still be dependent upon text macros defined in some other file.
+\newline
+
+Use the \textit{`timescale} directive to specify the time unit and time precision for subsequent module declarations. Any expression used in a context to mean simulation time will assume the time unit of the current module and be rounded to the time precision of the current module. System tasks that display simulation time will scale the display to the time unit of the current module.
+\newline
+
+Use the \textit{`pragma} directive to change how the compiler interprets subsequent source. A pragma consists of a name and an optional keyword and an optional value. The standard defines only the \textit{reset} and \textit{resetall} keywords. Tool vendors define additional pragmas.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Summary}
+We should now be able to direct the compiler how to interpret subsequent source code.
+\newline
+
+This module described:
+\scriptsize{
+\begin{itemize}
+\item The \textbf{`define} and \textbf{`undef} directives for substituting text.
+\item The \textbf{`ifdef, `else, `ifndef, `elsif} directives for conditionally compiling code.
+\item The \textbf{`include} directive for including files.
+\item The \textbf{`timescale} directive for setting the time scale.
+\item The \textbf{`begin\_keywords} and \textbf{`end\_keywords} directives for reserving keywords.
+\item The \textbf{`pragma} directive for using pragmas.
+\item The \textbf{`default\_nettype} directive from Verilog 2201.
+\end{itemize}
+}
+\end{frame}
+\note{
+Our objective is to appropriately and effectively utilize the compiler directives. To do that, we need to know what directives are available and what they do and how to use them.
 
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Module Review}
+\begin{enumerate}
+\item True or False; The \textbf{`undefall} compiler directive undefines all defined text macros.
+\item True or False: The standard pre-defines the VERILOG text macro that we can use to permit only the Verilog simulator to compile the code.
+\item What file does this code attempt to include?
+\begin{enumerate}
+	\item \textbf{`define ext inc}
+	\item \textbf{`define test(what) test.what. `ext}
+	\item \textbf{`include "`test(alu)"}
+\end{enumerate}
+\item What is the IEEE-standard default timescale for a module not subject to a \textbf{`timescale} directive?
+\end{enumerate}
 \end{frame}
 \note{
-
+\scriptsize{
+\begin{enumerate}
+\item True or False; The \textbf{`undefall} compiler directive undefines all defined text macros.
+\begin{itemize}
+	\tiny{
+	\item False. The standard does not decribe an \textbf{`undefall} directive. The \textbf{`undef} undefines one text macro.
+	}
+\end{itemize}
+\item True or False: The standard pre-defines the VERILOG text macro that we can use to permit only the Verilog simulator to compile the code.
+\begin{itemize}
+	\tiny{
+	\item False. The standard does not pre-define any text macros. Vendors may pre-define their own text macros such as VERILOG.
+	}
+\end{itemize}
+\item What file does this code attempt to include?
+\begin{enumerate}
+\tiny{
+	\item \textbf{`define ext inc}
+	\item \textbf{`define test(what) test.what. `ext}
+	\item \textbf{`include "`test(alu)"}
+}
+\end{enumerate}
+\begin{itemize}
+	\tiny{
+	\item It attempts to include the file "`test(alu)". The compiler directive's argument is a string literal. No generation is permitted.
+	}
+\end{itemize}
+\item What is the IEEE-standard default timescale for a module not subject to a \textbf{`timescale} directive?
+\begin{itemize}
+	\tiny{
+	\item The standard does not define a default time scale. If ANY module is subject to a time scale then ALL modules must be subject to a timescale.
+	}
+\end{itemize}
+\end{enumerate}
+}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Lab}
+Lab 12-1: Verifying the VeriRisc CPU Design
 \end{frame}
-\note{
 
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
-
-\end{frame}
-\note{
-
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
-
-\end{frame}
-\note{
-
-}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Test You Understanding - 1}
-
+Which one or more of these compiler directives does the \textbf{`resetall} directive reset to their default values.
 \begin{itemize}
-\item[$\square$] 
-\item[$\square$] 
-\item[$\square$] 
-\item[$\square$] 
+\item[$\square$] `timescale
+\item[$\square$] `default\_nettype
+\item[$\square$] `define
+\item[$\square$] `pragma
 \end{itemize}
 \end{frame}
 \note{
-
+Which one or more of these compiler directives does the \textbf{`resetall} directive reset to their default values.
+\begin{itemize}
+\item[$\boxtimes$] `timescale
+\item[$\boxtimes$] `default\_nettype
+\item[$\square$] `define
+\item[$\square$] `pragma
+\end{itemize}
 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test You Understanding - 2}
+Which one or more of these statement(s) about the \textbf{`timescale} directive can you rely upon?
+\begin{itemize}
+\item[$\square$] A time unit argument lower that the time precision argument is rounded up to the time precision argument value.
+\item[$\square$] The directive applies to all subsequent code compiled in the same session until and unless modified by a subsequent directive.
+\item[$\square$] The standard specifies a default timescale for modules not subject to a `timescale directive.
+\item[$\square$] The standard permits some simulation modules to be a subject to a `timescale directive and some simulation modules to rely upon the default timescale.
+\end{itemize}
+\end{frame}
+\note{
+Which one or more of these statement(s) about the \textbf{`timescale} directive can you rely upon?
+\begin{itemize}
+\item[$\square$] A time unit argument lower that the time precision argument is rounded up to the time precision argument value.
+\item[$\boxtimes$] The directive applies to all subsequent code compiled in the same session until and unless modified by a subsequent directive.
+\item[$\square$] The standard specifies a default timescale for modules not subject to a `timescale directive.
+\item[$\square$] The standard permits some simulation modules to be a subject to a `timescale directive and some simulation modules to rely upon the default timescale.
+\end{itemize}
+}
+
+
 
 \end{document}
