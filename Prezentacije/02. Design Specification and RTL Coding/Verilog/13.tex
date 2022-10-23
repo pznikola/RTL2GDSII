@@ -302,66 +302,186 @@ Continuous assignments and net declaration assignments drive values onto nets. T
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Modeling Combinational Logic Summary}
+\footnotesize{
+Summary of the steps to procedurally describe purely combinational logic:
+\begin{itemize}
+\item Start the procedure with the \textbf{always} construct.
+\item Immediately follow the always construct with an event control.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Place all possible input events in the event expression.	
+	}
+\end{itemize}
+\item Group multiple following statements with \textbf{begin...end} block.
+\item Provide default assignments to prevent latch inference.
+\item Avoid combinational feedback loops.
+\item Assign a variable in only one procedure.
+\end{itemize}
+}
+\end{frame}
+\note{
+\scriptsize{
+Here is a summary of the steps to procedurally describe purely combinational logic:
+\begin{itemize}
+\item Start the procedure with the \textbf{always} construct.
+\item Immediately follow the always construct with an event control. Place all possible input events in the event expression.	
+\item Group multiple following statements with \textbf{begin...end} block. We can omit the \textbf{begin...end} keywords if we have only a single statement.
+\item make blocking assignments. We can equally validly make non-blocking assignments, but they simulate less efficiently and provide no additional benefit. In any case, do NOT mix blocking and non-blocking assignments to the same variable and do NOT make assignments to a variable from multiple procedures.
+\item Provide default assignments to prevent latch inference.
+\item Avoid combinational feedback loops.
+\end{itemize}
+Remember that:
+\begin{itemize}
+\item Continuous assignments always synthesize to combinational logic.
+\item Functions almost always synthesize to combinational logic.
+\end{itemize}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Modeling Sequential Logic}
+\textbf{Sequential Logic}
+\newline
+
+\footnotesize{
+\begin{itemize}
+\item Outputs are sampled in registers on a clock edge, thus storage is required.
+\item As an always statement:
+\begin{itemize}
+	\footnotesize{
+	\item The event list must contain only posedge and negedge events.
+	\item Model set/reset behaviours in an if statement early branches and normal behaviour in the later branches.
+	\item Make non-blocking assignments to storage variables.	
+	}
+\end{itemize}
+\end{itemize}
+}
+\vspace{20pt}
+\begin{figure}
+    \includegraphics[width=0.75\textwidth]{img/13_seq_logic.png}
+\end{figure}
 
 \end{frame}
 \note{
 \scriptsize{
+We model sequential logic using an \textit{always} statement that has one or more \textit{posedge} or \textit{negedge} events in exactly one event list. Exactly one of those events represents the active clock edge that stores the value. Any additional \textit{posedge} or \textit{negedge} events represent asynchronous set and reset behaviours. The event list must NOT contain level-sensitive events.
+\newline
 
+We model the asynchronous set and reset behaviours by using an \textit{if} statement in the \textit{if} statement, we model the asynchronous behaviours in one or more conditional branches. The unconditional last \textit{else} branch models the normal sequential behaviour.
+\newline
+
+To avoid simulation clock/data races, we should make only non-blocking assignments to variables that represent storage. We make blocking assignments to temporary variables. Temporary variables are those written and then read in the same procedure and nowhere else.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Normal Behaviour}
+\scriptsize{
+\begin{multicols}{2}
+The event list for a sequential procedure must contain only single edges of clock signals.
+\begin{itemize}
+\item All events must be posedge or negedge qualified.
+\end{itemize}
+The synthesis tool infers registers:
+\begin{itemize}
+\item For non-temporary variables assigned in sequential procedures:
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Assigned with non-blocking statements	
+	}
+\end{itemize}
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/13_seq_normal.png}
+\end{figure}
+\end{multicols}
+}
 \end{frame}
 \note{
 \scriptsize{
+Synthesis tools recognize sequential procedures by looking for a particular code template - in this case, a procedure with an event list containing only edge-qualified signals. Although some synthesis tools may support other coding styles for sequential procedures, our adherence to this standard produces code that we can port between all synthesis tools compliant with the standard.
+\newline
 
+This example has only the positive edge of the clock in its event list. All storage inferred for non-temporary variables that this procedure writes will have a rising active clock edge. The \textit{if} statement describes the combinational logic calculating the new "count" value that is stored on the nest rising clock edge.
+\newline
+
+\textbf{Note that this example lacks a reset to initialize the count value!}
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Reset Behaviour}
+Use an \textbf{if...else} statement to add set/reset to a procedure.
+\footnotesize{
+\begin{itemize}
+\item Put the set/reset behaviour in the first branch.
+\item Put the normal sequential behaviour in the last branch.
+\item For asynchronous resets, add active set/reset edges to event list.
+\end{itemize}
+}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_seq_reset.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
+We can most easily provide set and reset behaviours by using an \textit{if} statement. This is a requirement for asynchronous set and reset behaviours and strongly recommended for synchronous set and reset behaviours. The synthesis tool will tread synchronous set and reset behaviours we model outside an \textit{if} statement as just that much more combinational logic.
+\newline
 
+If the \textit{if} statement, place the set and reset behaviours in their order of priority in the first conditional branches, and place the normal synchronous behaviour in the unconditional last \textit{else} branch. Do NOT make assignments to the storage variable outside of the \textit{if} statement.
+\newline
+For synchronous set and reset, trigger the procedure on only the clock edge/
+\newline
+
+For asynchronous set and reset, trigger the procedure also on the active set and reset edge(s).
+\newline
+Code synchronously reset, asynchronously reset and non reset registers in separate procedures.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Sequential Procedure Templates}
+Code must follow these templates:
+\footnotesize{
+\begin{itemize}
+\item Procedure starts with an always construct.
+\item Followed by one event control containing only edge-qualified signals.
+\begin{itemize}
+\footnotesize{
+	\item[$-$] Clock
+	\item[$-$] Asynchronous set or reset
+	}
+\end{itemize}
+\end{itemize}
+}
+\vfill
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_seq_template.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
+Sequential procedures have the clock edge in the event list, and also the set and reset edge(s) if there is asynchronous set or reset.
+\newline
 
+Separately code your non reset, synchronous reset and asynchronous reset procedures.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
-\end{frame}
-\note{
-\scriptsize{
-
-
-}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Module}
+\frametitle{Incomplete Assignments}
 
 \end{frame}
 \note{
