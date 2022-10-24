@@ -482,6 +482,207 @@ Separately code your non reset, synchronous reset and asynchronous reset procedu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Incomplete Assignments}
+\footnotesize{
+
+\textbf{Sequential Logic}
+\begin{itemize}
+\item Output is not at all times a combinational function solely of the inputs.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Implies some kind of storage
+	}
+\end{itemize}
+\item Incomplete assignment in a sequential procedure does not infer a latch.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Storage is already there!
+	}
+\end{itemize}
+\end{itemize}
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{img/13_seq_incomplete.png}
+\end{figure}
+
+}
+\end{frame}
+\note{
+\scriptsize{
+If procedure execution does not update a variable, then the variable value is not changed. In procedures representing combinational logic, this infers a latch to store a previous variable value. For procedures representing synchronous logic, the variable value is stored in the inferred register. For these procedures we do not use default assignment or \textit{else} clauses to prevent latch inference.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Blocking vs. Non-blocking Assignment}
+Write a Verilog sequential procedure to codify this behaviour.
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_block_vs_nonblock.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+Good coding practice demands that we make only non-blocking assignments to variables that represent storage elements. This is to avoid clock/data races in simulation and to avoid unintended logic inference in synthesis. The synthesis standard requires only that we do not mix the two types of assignments to the same variable.
+\newline
+
+For examples 1 and 2, we can see that with non-blocking assignments the order of assignments is \textbf{not} important, as simulation schedules the actual assignments for the NBA region of the stratified event queue.
+\newline
+
+For examples 3 and 4, we can see that with blocking assignments the order of assignments \textbf{is} important, as the simulation completes the assignments as it executes the statements. Different order generates different simulation results and different synthesis results.
+\begin{itemize}
+\item Example 3 reads variable \textit{b} before writing it, so synthesis infers two registers.
+\item Example 4 reads variable \textit{b} after writing it. Variable \textit{b} is temporary variable. Synthesis infers on register.
+\end{itemize}
+
+\textbf{From IEEE Std. 1364.1-2002} \textit{Section 5.2.2} Modeling edge-sensitive storage devices:
+
+Non-blocking procedural assignments should be used for variables that model edge-sensitive storage devices.
+
+}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Temporary Variables in Sequential Procedures}
+
+\scriptsize{
+\begin{multicols}{2}
+\textbf{Persistent Variable}
+\begin{itemize}
+\item Read first and then written (in the same procedure)
+\item Synthesis must infer a register to hold a value to the next read.
+\end{itemize}
+
+\vfill
+\columnbreak
+
+\textbf{Temporary Variable}
+\begin{itemize}
+\item Written first and then read (in the same procedure)
+\item Variable is alias for expression so no register is inferred
+\end{itemize}
+
+\end{multicols}
+}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_temp_var.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+We can use a temporary variable to hold intermediate result of a calculation before we use the result later in the procedure. We use temporary variables to break complex expressions and combinational logic into a series of smaller steps - making complex logic easier to describe, understand and maintain.
+\newline
+
+A temporary variable is one that a procedure writes with a blocking assignment only before the procedure reads it, and no other procedure uses it. We can declare temporary variables locally to ensure that no other procedure uses it.
+\newline
+
+A typical use model would be to make blocking assignments to temporary variables and the make non-blocking assignment of the temporary variable values to other variables.
+\newline
+
+\textbf{From IEEE Std. 1364.1-2002} \textit{Section 5.2.2} Modeling edge-sensitive storage devices:
+
+Blocking procedural assignments may be used for variables that are temporary assigned and used within an always statement.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Modeling Sequential Logic Summary}
+\footnotesize{
+Summary of the steps to procedurally describe sequential logic:
+\begin{itemize}
+\item Start the procedure with the \textit{always} construct.
+\item Immediately follow the always construct with an event control.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Use only posedge or negedge events in the event expression.
+	\item[$-$] Include only clock and asynchronous set/reset events.	
+	}
+\end{itemize}
+\item Group multiple following statements within a \textit{begin...end} block.
+\item Place the asynchronous set/reset behaviours firs (in their order of priority) in the \textit{if} statement.
+Place the normal sequential behaviour in the last \textit{else} branch.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Make blocking assignments only to the temporary variables.
+	\item[$-$] Make non-blocking assignments to the register variables.	
+	}
+\end{itemize}
+\item Do not make assignments to a variable from multiple procedures.
+\end{itemize}
+}
+\end{frame}
+\note{
+\scriptsize{
+Here is a summary of the steps to procedurally describe sequential logic:
+\begin{itemize}
+\item Start the procedure with the \textit{always} construct. Immediately follow the always construct with an event control, placing only edge-qualified events in the event expression.
+\item Group multiple following statements within a \textit{begin...end} block. We can omit the \textit{begin...end} keywords if we have only a single statement.
+\item Make blocking assignments only to the temporary variables and make only non-blocking assignments to variables representing storage. Write the temporary variables only before you read them in the same procedure. Do not make assignments to a variable from multiple procedures.
+\end{itemize}
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Modeling Latch Logic}
+But what if we want to infer a latch?
+\footnotesize{
+\begin{itemize}
+\item A combinational block that for some combination of inputs does not provide output value infers storage i.e., a latch.
+\item Make assignments for latch logic as we do for sequential logic.
+\begin{itemize}
+	\scriptsize{
+	\item[$-$] Make blocking assignments to only the temporary variables
+	\item[$-$] Write temporary variables only before they are read
+	\item[$-$] Make non-blocking assignments to the latch variable
+	}
+\end{itemize}
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.75\textwidth]{img/13_latch.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+We deliberately infer a latch, if we truly want to, the same way we inadvertently infer a latch, with the exception that we need to remember to make a non-blocking assignment to the variable that represents the latch.
+\newline
+
+A latch-based design can have higher performance than a register-based design, but can also be more difficult to correctly design and debug. Use of latches is typically infrequent and reserved for extenuating circumstances.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Modeling Three-State Logic}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_three_state.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+We model three-state logic by assigning the high-impedance value to a net or variable. Any other assignments to that net or variable must also assign the high-impedance value. Further propagating the high-impedance value by use of net or variable assignments does not also make that downstream logic into three-state logic.
+\newline
+
+This example codes behaviour representing three-state drivers in a form that synthesis can recognize. For this example:
+\begin{itemize}
+\item The "enable1" signal when high drives "data\_1" onto the data bus
+\item The "enable2" signal when high drives "data\_2" onto the data bus.
+\end{itemize}
+The synthesis standard does not address what the result should be if multiple enables are simultaneously true.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Using Synthesis Attributes}
 
 \end{frame}
 \note{
@@ -503,8 +704,53 @@ Separately code your non reset, synchronous reset and asynchronous reset procedu
 }
 }
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+\note{
+\scriptsize{
 
 
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+\note{
+\scriptsize{
+
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+\note{
+\scriptsize{
+
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module}
+
+\end{frame}
+\note{
+\scriptsize{
+
+
+}
+}
 
 
 
