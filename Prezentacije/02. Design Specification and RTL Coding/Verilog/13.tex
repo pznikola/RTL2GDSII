@@ -681,94 +681,545 @@ The synthesis standard does not address what the result should be if multiple en
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Using Synthesis Attributes}
+\footnotesize{
+Verilog attributes provide supporting information about HDL items.
 
+Verilog defines only the attribute syntax and where they may appear.
+
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{purple}{	(* name [= const_expr] \{, name [= const_expr] \} *)}
+\end{Verbatim}
+\begin{itemize}
+\item Does not define any attribute names or values
+\end{itemize}
+
+The synthesis standard defines some attributes and their purpose.
+\begin{itemize}
+\item For some the standard does not define what values to accept
+\end{itemize}
+
+Synthesis vendors add their own attributes.
+\begin{itemize}
+\item Also other pragmas in the form of metacomments
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_attributes.png}
+\end{figure}
 \end{frame}
 \note{
-\scriptsize{
+\tiny{
+The IEEE Std. 1364-2001 Verilog HDL defines an attribute construct as a means to provide supporting
+information about an HDL construct to the various tools reading the HDL. The Verilog standard defines only the
+attribute syntax and where they may appear, and does not define any particular attributes.
+\newline
 
+The IEEE Std. 1364.1-2002 for Verilog RTL synthesis defines some synthesis attributes and requires that if a
+compliant tool supports any means to provide this information then it must support provision my means of the
+attributes.
+\newline
+
+As synthesis existed for many years prior to the Verilog RTL synthesis standard, synthesis vendors typically do
+still offer their own means to provide this information as metacomments. The industry collectively refers to these
+attributes and metacomments as “pragmas”.
+\newline
+
+This section will describe only a few of the standard synthesis attributes.
+\newline
+
+Attributes: “...properties about objects, statements and groups of statements in the HDL source...” – IEEE Std.
+1364-2001 Section 2.8 Attributes
+\newline
+
+“An attribute instance can appear in the Verilog description as a prefix attached to a declaration, a module item, a
+statement, or a port connection. It can appear as a suffix to an operator or a Verilog function name in an
+expression.” – IEEE Std. 1364-2001 Section 2.8 Attributes
+\newline
+
+“A pragma is a generic term used to define a construct with no predefined language semantics that influences how
+a synthesis tool should synthesize Verilog HDL code into a circuit.” – IEEE Std. 1364.1-2002 Section 6 Pragmas
+\newline
+
+“If a synthesis tool supports pragmas to control the structure of the synthesized netlist or to give direction to the
+synthesis tool, attributes shall be used to convey the required information.” – IEEE Std. 1364.1-2002 Section 6.1
+Synthesis attributes.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Pragma “full\_case”}
+\footnotesize{
+\begin{itemize}
+\item Synthesis tools accept a pragma to complete a \textbf{case} statement.
+\item The directive applies to the case item expressions, not their statements!
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_pragma_full.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
-
+The full\_case attribute directs the synthesis tool to assign don't-care values to case statement outputs for
+all unspecified case choices. Synthesis can still infer a latch for outputs not assigned by all specified
+case items. Your use of the full\_case attribute thus promotes inadvertent errors. A better solution is to
+explicitly provide default values for all procedure outputs.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Pragma “parallel\_case”}
+Synthesis tools accept a pragma to suppress the priority structure.
+\vfill
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_pragma_parallel.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
-
+The parallel\_case attribute directs the synthesis tool to disregard the implied priority of the case items
+and test all case items in parallel. This is in effect a declaration that the case items are mutually
+exclusive in normal operation, and can produce a more optimal post-synthesis netlist. You must be very
+careful to not declare case items to be mutually exclusive if they are not.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Pragma “implementation”}
+\scriptsize{
+\begin{itemize}
+\item Synthesis tools accept a pragma to recommend an operator architecture. The synthesis vendor defines the legitimate attribute values.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_pragma_implementation.png}
+\end{figure}
+\begin{itemize}
+\item It is generally a good coding style to give the synthesis tool and simulator same information about the functionality of a design.
+\end{itemize}
+}
 \end{frame}
 \note{
 \scriptsize{
+\textbf{Make the code correct by construction rather than using pragma. (Pragmas can be found majorly in some legacy code.)}
+\newline
 
+The implementation attribute recommends an architecture for operator implementation. The synthesis vendor defines the legitimate values. The synthesis tool can legally ignore the recommendation.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
-
+\frametitle{Pragma [a]sync\_set\_reset}
+Synthesis tools accept a pragma to cause direct connection of set / reset signals to set / reset terminals and optionally designate set / reset signals.
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_pragma_async_reset.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
+The sync\_set\_reset attribute causes synthesis to directly connect synchronous set and reset signals to the
+device set and reset terminals, if a device with such terminals exists in the library. You can apply this
+attribute to a module or to a procedure. If you also designate the set or reset signals, then synthesis will
+not directly connect any other set or reset signals to the device set and reset terminals, but will instead
+route them into the data logic.
+\newline
 
+The async\_set\_reset attribute has exactly the same effect upon latch logic.
 
 }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Module}
+\frametitle{Reference: Synthesis Attributes}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_reference_attributes.png}
+\end{figure}
+\end{frame}
+\note{
+\tiny{
 
+The async\_set\_reset attribute specifies that asynchronous set and reset signals of the module or procedure to which it applies
+shall directly connect to the asynchronous set and reset terminals of the library device if the library provides a device with
+such terminals. If the attribute specifies signal names, then any other set and reset signals shall not directly connect to
+asynchronous set and reset terminals of the device.
+
+The black\_box attribute specifies that synthesis shall ignore the internal contents of the instance or module to which it
+applies.
+
+The combinational attribute specifies that synthesis shall report as an error any storage inferred by the module or procedure
+to which it applies.
+
+The fsm\_state attribute specifies a state encoding scheme for the register to which it applies.
+
+The full\_case attribute specifies that you don’t care what the outputs are for unspecified case choices.
+
+The implementation attribute recommends an operator architecture.
+
+The keep attribute specifies that synthesis shall preserve an instance, module, net or register “as is”.
+
+The label attribute labels an item for future reference.
+The logic\_block attribute supports implementation of a RAM or ROM block in discrete gates.
+
+The op\_sharing attribute can disable operator sharing within a module. Operator sharing may occur anyway without the
+attribute. With the attribute enabled, operator sharing may still not occur.
+The parallel\_case attribute specifies that synthesis should suppress the normal case statement priority architecture.
+
+The ram\_block attribute supports selection of an inferred RAM device.
+
+The rom\_block attribute supports selection of an inferred ROM device.
+
+The sync\_set\_reset attribute specifies that synchronous set and reset signals of the module or procedure to which it applies
+shall directly connect to the synchronous set and reset terminals of the library device if the library provides a device with
+such terminals. If the attribute specifies signal names, then any other set and reset signals shall not directly connect to
+synchronous set and reset terminals of the device.
+
+The probe\_port attribute causes synthesis to provide a top-level output port connected to the net or
+register.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Reference: Unsupported Verilog Constructs}
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_unsupported.png}
+\end{figure}
 \end{frame}
 \note{
 \scriptsize{
+Here for your reference, are constructs that the synthesis tool does not support, and constructs that the synthesis tool ignores.
+\newline
 
+Synthesis supports the always keyword only with an immediately following event control (@).
 
 }
 }
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Summary}
+\scriptsize{
+We should now be able to properly code hardware for logic synthesis.
+\newline
 
+This module discussed the following:
+\begin{itemize}
+\item Modeling combinational logic
+\begin{itemize}
+	\scriptsize{
+	\item In an \textbf{always} block with complete sensitivity list, blocking assignments, and all block outputs assigned each time the
+block is executed.
+	}
+\end{itemize}
+\item Modeling sequential logic
+\begin{itemize}
+	\scriptsize{
+	\item In an \textbf{always} block sensitive to edge-qualified events, nonblocking assignments, and set/reset behaviour in early
+conditional statement branches.
+	}
+\end{itemize}
+\item Modeling latch logic
+\begin{itemize}
+	\scriptsize{
+	\item By deliberately omitting an output value for some combination of input values.
+	}
+\end{itemize}
+\item Modeling three-state logic
+\begin{itemize}
+	\scriptsize{
+	\item By assigning the high-impedance (Z) state when disabled.
+	}
+\end{itemize}
+\item Using synthesis attributes
+\begin{itemize}
+	\scriptsize{
+	\item E.g., (* synthesis, implementation = "cla" *).
+	}
+\end{itemize}
+\end{itemize}
+}
+\end{frame}
+\note{
+\scriptsize{
+This module explained how to describe hardware for logic synthesis. It addressed combinational, sequential, latch, and three-state logic. It introduced synthesis attributes that you embed in the source code to influence the synthesis process.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Review}
+\scriptsize{
+\begin{enumerate}
+\item For what conditions does logic synthesis infer a latch in logic you intend to be purely combinational?
+\item Explain why a synthesis tool may or may not infer a register for a blocking assignment to a variable.
+\item For what Verilog construct does synthesis infer a three-state gate?
+\item In what most significant way does synthesis restrict a for loop?
+\end{enumerate}
+}
+\end{frame}
+\note{
+\scriptsize{
+\begin{enumerate}
+\item For what conditions does logic synthesis infer a latch in logic you intend to be purely combinational?
+\begin{itemize}
+	\tiny{
+	\item If you fail to specify an output value for at least one combination of input values then logic synthesis will insert a latch.
+	}
+\end{itemize}
+\item Explain why a synthesis tool may or may not infer a register for a blocking assignment to a variable.
+\begin{itemize}
+	\tiny{
+	\item Synthesis infers a register for a blocking assignment to a variable that occurs after the variable is already read in the
+execution of a sequential procedure. If the variable is written before it is read then it is only a temporary variable.
+	}
+\end{itemize}
+\item For what Verilog construct does synthesis infer a three-state gate?
+\begin{itemize}
+	\tiny{
+	\item Synthesis infers a three-state gate if you conditionally assign the high-impedance value to a variable.
+	}
+\end{itemize}
+\item In what most significant way does synthesis restrict a for loop?
+\begin{itemize}
+	\tiny{
+	\item You can synthesize a for loop if the number of iterations is a compile-time constant. The synthesis tool unrolls the loop
+so needs to know the exact number of iterations.
+	}
+\end{itemize}
+\end{enumerate}
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Module Exercise}
+Fix these procedures to make them legal for synthesis:
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_ex.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+\begin{figure}
+    \includegraphics[width=0.95\textwidth]{img/13_ex_sol.png}
+\end{figure}
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+Lab 13-1: Using a Component Library
+\begin{itemize}
+\item For this Lab, you demonstrate mastery of basic coding styles.
+\item And you code and synthesize some representative models.
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+Your objective for this lab is to describe design behaviour for logic synthesis.
+\newline
+
+For this lab, you code and synthesize several simple models and observe the results of different coding
+techniques.
+
+}
+}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Test You Understanding - 1}
+For this piece of your code the synthesis tool infers logic that is:
 
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = a;
 \begin{itemize}
-\item[$\square$] 
-\item[$\square$] 
-\item[$\square$] 
-\item[$\square$] 
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
 \end{itemize}
 \end{frame}
 \note{
+\scriptsize{
+For this piece of your code the synthesis tool infers logic that is:
 
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = a;
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\boxtimes$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
+\end{itemize}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test You Understanding - 2}
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = 'bz;
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = 'bz;
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\boxtimes$] three-state
+\end{itemize}
+}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test You Understanding - 3}
+
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = 'bx;
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+    
+\ \ \ \ else y = 'bx;
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\boxtimes$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\end{itemize}
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test You Understanding - 4}
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @*
+  
+\ \ \ \ if(s) y = b;
+
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\boxtimes$] latched
+\item[$\square$] three-state
+\end{itemize}
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Test You Understanding - 5}
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @(posedge c)
+  
+\ \ \ \ if(s) y = b;
+
+\begin{itemize}
+\item[$\square$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
+\end{itemize}
+\end{frame}
+\note{
+\scriptsize{
+For this piece of your code the synthesis tool infers logic that is:
+
+\ \ always @(posedge c)
+  
+\ \ \ \ if(s) y = b;
+
+\begin{itemize}
+\item[$\boxtimes$] sequential
+\item[$\square$] buffered
+\item[$\square$] combinational
+\item[$\square$] latched
+\item[$\square$] three-state
+\end{itemize}
+}
 }
 
 
