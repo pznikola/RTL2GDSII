@@ -579,6 +579,202 @@ $assign\ p = a + b;\ assign\ q = c + d;\ assign\ r = p + q;\ assign\ y = r[17:8]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Selecting the Architecture: ChipWare}
+\scriptsize{
+Advanced synthesis tools such as the Cadence Encounter RTL Compiler (RC) have libraries of re-usable designs.
+\begin{multicols}{2}
+\begin{itemize}
+\item The Cadence ChipWare (CW) library includes:
+\begin{itemize}
+\tiny{
+	\item[$-$] Common combinational and sequential components.
+	\item[$-$] Arithmetic components (adders, subtractors, multipliers).
+	\item[$-$] Memory components (flip-flops, FIFOs).
+}
+\end{itemize}
+
+\item Logic synthesis automatically maps operators to available CW components.
+\item Many CW components have multiple architectural implementations allowing logic synthesis to make area/time trade-offs.
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/17_chipware.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\tiny{
+A ChipWare library is a set of re-usable functional blocks.
+\newline
+
+The Cadence Encounter RTL Compiler comes with a large set of pre-defined ChipWare components. You can add your own user-defined ChipWare components, and an IP vendor can package re-usable blocks as user-defined ChipWare components and provide them in a user-defined ChipWare library.
+\newline
+
+ChipWare involves a four-tier hierarchy:
+\begin{enumerate}
+\item HDL operators (e.g., "$+$") and HDL functions.
+\item Synthetic operators, a language-neutral and technology-independent definition of a particular operator or function. For example, ADD\_UNS\_OP is a synthetic operator representing an addition between two unsigned operands. A synthetic operator can be bound to a selection of ChipWare components.
+\item ChipWare components, which can have multiple implementations.
+\item The component implementations.
+\end{enumerate}
+
+The Cadence RTL Compiler knows about the interface and functionality of these libraries, and for each operator, chooses an implementation based upon QoS calculations.
+\newline
+
+You can alternatively directly instantiate a ChipWare implementation in your RTL code.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Selecting the Architecture: Tradeoffs}
+\footnotesize{
+\begin{itemize}
+\item Different architectures have different area and timing characteristics.
+\item Logic synthesis chooses the smallest available architecture meeting timing.
+\end{itemize}
+}
+\begin{figure}
+    \includegraphics[width=0.85\textwidth]{img/17_tradeoffs.png}
+\end{figure}
+\end{frame}
+\note{
+\scriptsize{
+Different resource implementations have different area and timing characteristics.
+\newline
+
+Logic synthesis chooses from the available implementations the smallest that it expects to meet the timing requirements.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Selecting the Architecture: Manual Instantiation}
+\scriptsize{
+\begin{multicols}{2}
+Sometimes you need to explicitly instantiate a specific technology vendor’s library macro-cell that the tool does not infer:
+\begin{itemize}
+\item I/O pad
+\item Memory
+\item Processor (etc.)
+\end{itemize}
+Explicit instantiation creates issues:
+\begin{itemize}
+\item Makes code technology dependent
+\item Can prevent some optimizations
+\item Can make the code less readable
+\end{itemize}
+\vfill
+\columnbreak
+\begin{figure}
+    \includegraphics[width=0.45\textwidth]{img/17_macros.png}
+\end{figure}
+\end{multicols}
+}
+\end{frame}
+\note{
+\scriptsize{
+Sometimes you need to explicitly instantiate a specific technology vendor’s library macrocell that the tool does not infer, for example the I/O pads, a memory block, or an embedded processor. This explicit macro instantiation makes the code dependent upon the technology. To somewhat preserve technology independence, you can wrap the technology-specific component in a module for which you provide a technology-independent interface. You instantiate your technology-independent module where needed and configure the design to choose one or the other definition of the module.
+\newline
+
+
+Sometimes you want to explicitly instantiate a specific technology vendor’s library macrocell because you want to force a specific implementation. This explicit macro instantiation can make the code less readable. To preserve readability you can instead retain the operator and utilize tool-specific pragmas to map specific HDL operators to specific implementations.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Mapping to Technology Cells and Optimize}
+\footnotesize{
+Map "generic" logic functions to cells that are actually available in the technology library, including:
+\begin{itemize}
+\item Set target timing goals
+\item Map to technology cells to meet timing goals
+\item Iteratively remap cells on critical paths
+\item Incrementally re-optimize critical regions
+\end{itemize}
+\vspace{6pt}
+\textbf{Example}
+\begin{Verbatim}[commandchars=\\\{\}, tabsize=2]
+\textcolor{blue}{	synthesize -to_map}
+\end{Verbatim}
+}
+\end{frame}
+\note{
+\scriptsize{
+Mapping the design to technology cells typically includes concurrent optimizations such as restructuring, splitting, pin swapping, buffering, pattern matching, and isolation.
+\newline
+
+The tool may then execute multiple remapping phases – some targeted at area optimization and others at timing optimization. The remapping operations are predominantly focused upon resizing the cells.
+\newline
+
+The tool lastly performs an incremental optimization to improve timing and area and fix design rule (DRC) violations. Timing by default is the highest priority. Incremental optimization can also include iterative re-synthesis of fragments of the critical path to improve timing.
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Technology-Dependent Optimization}
+
+\end{frame}
+\note{
+\scriptsize{
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+
+\end{frame}
+\note{
+\scriptsize{
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+
+\end{frame}
+\note{
+\scriptsize{
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+
+\end{frame}
+\note{
+\scriptsize{
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
+
+\end{frame}
+\note{
+\scriptsize{
+
+}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Lab}
 
 \end{frame}
 \note{
